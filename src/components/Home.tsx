@@ -4,8 +4,9 @@ import { useLayoutEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { OmegaIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { fetchMailsAction, syncEncryptedMailsToDb } from '@/app/actions';
-import { Mail } from '@/types';
+import { fetchMailsAction, analyzeMailsAction, syncEncryptedMailsToDb } from '@/app/actions';
+import { AnalyzeOptions, Mail } from '@/types';
+import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 import { readMailsFromCache, writeMailsToCache } from '@/lib/mailCache';
 
@@ -13,18 +14,20 @@ import SiphonLoader from './Loader';
 import Header from './Header';
 import MailTable from './MailTable';
 import MailSheet from './MailSheet';
-import VoiceModal from './VoiceModal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
 import Image from 'next/image';
-import FetchMailsConfirmDialog from './FetchMailsConfirmDialog';
+import FetchDialog from './FetchDialog';
+import AnalyzeDialog from './AnalyzeDialog';
+import AnalyzedMailsPriorityGraph from './AnalyzedMailsPriorityGraph';
+import { apiRequest } from '@/lib/api';
 
 type SystemStatus = 'Active' | 'Standby' | 'Processing' | 'Offline';
 
 const statusConfig = {
-  Active: { color: 'bg-green-500', shadow: 'shadow-[0_0_10px_rgba(34,197,94,0.5)]', animation: 'animate-ping' },
-  Standby: { color: 'bg-amber-500', shadow: 'shadow-[0_0_10px_rgba(245,158,11,0.5)]', animation: '' },
+  Active: { color: 'bg-green-500', shadow: 'shadow-[0_0_10px_rgba(34,197,94,0.5)]', animation: 'animate-pulse' },
+  Standby: { color: 'bg-amber-500', shadow: 'shadow-[0_0_10px_rgba(245,158,11,0.5)]', animation: 'animate-pulse' },
   Processing: { color: 'bg-blue-500', shadow: 'shadow-[0_0_10px_rgba(59,130,246,0.5)]', animation: 'animate-pulse' },
-  Offline: { color: 'bg-red-600', shadow: 'shadow-[0_0_10px_rgba(220,38,38,0.5)]', animation: '' },
+  Offline: { color: 'bg-red-600', shadow: 'shadow-[0_0_10px_rgba(220,38,38,0.5)]', animation: 'animate-pulse' },
 };
 
 export default function Home({
@@ -39,12 +42,14 @@ export default function Home({
   const [appLoading, setAppLoading] = useState(true);
   const [mails, setMails] = useState<Mail[]>(initialMails);
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [fetchDialogOpen, setFetchDialogOpen] = useState(false);
+  const [analyzeDialogOpen, setAnalyzeDialogOpen] = useState(false);
+  const [analyzedExistingMails, setAnalyzedExistingMails] = useState<Mail[]>([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [detailMail, setDetailMail] = useState<Mail | null>(null);
-  const [voiceOpen, setVoiceOpen] = useState(false);
   const [serviceStatus, setServiceStatus] = useState<SystemStatus>('Active');
   const [orchestratorStatus, setOrchestratorStatus] = useState<SystemStatus>('Offline');
 
@@ -57,32 +62,92 @@ export default function Home({
     });
   }, [sessionUserEmail]);
 
-  const handleUseCached = () => {
+  const handleFetchFromCache = () => {
     const cached = readMailsFromCache(sessionUserEmail);
     if (cached.length === 0) {
       toast.error('No Cache found!');
       return;
     }
     setMails(cached);
-    toast.success('Loaded Cache!');
+    toast.success('Cache Loaded!');
   };
 
-  const handleFetchFromGmail = () => {
+  const handleFetchFromCloud = () => {
     void (async () => {
       setLoading(true);
+      setServiceStatus("Standby")
       try {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setServiceStatus("Processing")
         const data = await fetchMailsAction();
         setMails(data);
         writeMailsToCache(sessionUserEmail, data);
         if (data.length === 0) {
           toast.error('No New Messages!');
         } else {
-          toast.success('New Messages Synched!');
+          toast.success('Messages Synched!');
         }
       } catch {
         toast.error('Protocol failure: Could not retrieve new messages');
       } finally {
         setLoading(false);
+        setServiceStatus(serviceStatus)
+      }
+    })();
+  };
+  const handleSignOut = async () => {
+    setLoading(true);
+    setSyncing(true);
+    setAnalyzing(true);
+    setOrchestratorStatus("Standby")
+    setServiceStatus("Standby")
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    signOut();
+    setLoading(false);
+    setSyncing(false);
+    setAnalyzing(false);
+    setOrchestratorStatus(orchestratorStatus)
+    setServiceStatus(serviceStatus)
+    toast.success("Session Closed!")
+  };
+  const handleAnalyze = (opts: AnalyzeOptions) => {
+    void (async () => {
+      setAnalyzing(true);
+      setOrchestratorStatus("Standby")
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setOrchestratorStatus("Processing")
+        const data = await analyzeMailsAction(opts);
+        if (!data.ok) {
+          toast.error(data.error ?? 'Analyze failed');
+          setAnalyzedExistingMails([]);
+          return;
+        }
+        setAnalyzedExistingMails(data.existingInDb ?? []);
+        if (data.missingInDb?.length === 0) {
+          toast.success('No New Message!');
+        } else {
+          toast.success(`${data.missingInDb?.length}/${Number(data.existingInDb?.length) + Number(data.missingInDb?.length)} Mails Ready for Analysis`);
+        }
+        const analyzeBody = { newMails: data.missingInDb, existingMails: data.existingInDb, options: opts }
+        const toastId = toast.loading("Analyzing...");
+        await apiRequest<{ status: number; message: string }>("/analyze/mails", {
+          method: "POST",
+          body: analyzeBody,
+        });
+        // setMails(data);
+        // writeMailsToCache(sessionUserEmail, data);
+        // if (data.length === 0) {
+        //   toast.error('No New Messages!');
+        // } else {
+        //   toast.success('New Messages Synched!');
+        // }
+        toast.dismiss(toastId)
+      } catch {
+        toast.error('Protocol failure: Could not retrieve new messages');
+      } finally {
+        setOrchestratorStatus(orchestratorStatus)
+        setAnalyzing(false);
       }
     })();
   };
@@ -94,15 +159,19 @@ export default function Home({
         return;
       }
       setSyncing(true);
+      setServiceStatus("Standby")
       try {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setServiceStatus("Processing")
         const result = await syncEncryptedMailsToDb();
         if (!result.ok) {
           toast.error(result.error ?? 'Cloud sync failed!');
         } else {
-          toast.success(`Cloud Synched with ${result.count ?? 0} Messages!`);
+          toast.success(`Cloud Synched!`);
         }
       } finally {
         setSyncing(false);
+        setServiceStatus(serviceStatus)
       }
     })();
   };
@@ -128,10 +197,11 @@ export default function Home({
         <Header
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          analyzing={analyzing}
           loading={loading}
           syncing={syncing}
-          onAnalyze={() => undefined}
-          onVoice={() => setVoiceOpen(true)}
+          onSignOut={handleSignOut}
+          onAnalyze={() => setAnalyzeDialogOpen(true)}
           onFetch={() => setFetchDialogOpen(true)}
           onSyncCloud={handleSyncCloud}
           sessionUserEmail={sessionUserEmail}
@@ -239,18 +309,26 @@ export default function Home({
             />
           </CardContent>
         </Card>
+        {analyzedExistingMails.length > 0 && (
+          <AnalyzedMailsPriorityGraph mails={analyzedExistingMails} onOpenDetail={setDetailMail} />
+        )}
       </motion.div>
 
       <MailSheet mail={detailMail} onClose={() => setDetailMail(null)} />
 
-      <FetchMailsConfirmDialog
+      <FetchDialog
         open={fetchDialogOpen}
         onOpenChange={setFetchDialogOpen}
-        onUseCached={handleUseCached}
-        onFetchFromGmail={handleFetchFromGmail}
+        onFetchFromCache={handleFetchFromCache}
+        onFetchFromCloud={handleFetchFromCloud}
       />
 
-      <VoiceModal open={voiceOpen} onClose={() => setVoiceOpen(false)} onResult={(text) => setSearchTerm(text)} />
+      <AnalyzeDialog
+        open={analyzeDialogOpen}
+        onOpenChange={setAnalyzeDialogOpen}
+        onAnalyze={(opts: AnalyzeOptions) => { handleAnalyze(opts); }}
+      />
+
     </div>
   );
 }

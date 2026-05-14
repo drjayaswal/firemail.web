@@ -1,16 +1,12 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { db } from "@/app/db";
-import { encryptedMail } from "@/app/db/schema";
-import { ensureUserRowFromSession } from "@/lib/oauthDbSync";
-import { getGmailMails } from "@/lib/action";
-import { encryptJsonPayload } from "@/lib/mail-crypto";
-import type { Mail } from "@/types";
+import { fetchInternalApi } from "@/lib/internal-api";
+import { getMails, getCustomMails } from "@/lib/action";
+import type { AnalyzeOptions, Mail } from "@/types";
 
 export async function fetchMailsAction(): Promise<Mail[]> {
   try {
-    return await getGmailMails();
+    return await getMails();
   } catch {
     return [];
   }
@@ -21,47 +17,48 @@ export async function syncEncryptedMailsToDb(): Promise<{
   count?: number;
   error?: string;
 }> {
-  const session = await auth();
-  const userId = session?.user?.id;
-  if (!userId) {
-    return { ok: false, error: "Unauthorized" };
-  }
-  const ensured = await ensureUserRowFromSession(session);
-  if (!ensured) {
-    return { ok: false, error: "Missing user id or email for vault" };
-  }
-  let mails: Mail[];
   try {
-    mails = await getGmailMails();
-  } catch {
-    return { ok: false, error: "Could not load mail from Gmail" };
-  }
-  if (mails.length === 0) {
-    return { ok: false, error: "No mails to sync" };
-  }
-  try {
-    const now = new Date();
-    for (const m of mails) {
-      const ciphertext = encryptJsonPayload(m);
-      await db
-        .insert(encryptedMail)
-        .values({
-          userId,
-          gmailMessageId: m.id,
-          ciphertext,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .onConflictDoUpdate({
-          target: [encryptedMail.userId, encryptedMail.gmailMessageId],
-          set: {
-            ciphertext,
-            updatedAt: now,
-          },
-        });
+    const res = await fetchInternalApi("/api/mail/sync", { method: "POST" });
+    const data = (await res.json()) as { ok?: boolean; count?: number; error?: string };
+    if (!res.ok) {
+      return { ok: false, error: typeof data.error === "string" ? data.error : "Sync failed" };
     }
-    return { ok: true, count: mails.length };
+    if (data.ok === true && typeof data.count === "number") {
+      return { ok: true, count: data.count };
+    }
+    return { ok: false, error: typeof data.error === "string" ? data.error : "Sync failed" };
   } catch {
     return { ok: false, error: "Sync failed" };
+  }
+}
+
+export async function analyzeMailsAction(options: AnalyzeOptions): Promise<{
+  ok: boolean;
+  existingInDb?: Mail[];
+  missingInDb?: Mail[];
+  error?: string;
+}> {
+  try {
+    const res = await fetchInternalApi("/api/mail/analyze-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(options),
+    });
+    const data = (await res.json()) as {
+      ok?: boolean;
+      existingInDb?: Mail[];
+      missingInDb?: Mail[];
+      error?: string;
+    };
+    if (!res.ok) {
+      return { ok: false, error: typeof data.error === "string" ? data.error : "Request failed" };
+    }
+    if (data.ok === true && Array.isArray(data.existingInDb) && Array.isArray(data.missingInDb)) {
+      return { ok: true, existingInDb: data.existingInDb, missingInDb: data.missingInDb };
+    }
+    return { ok: false, error: typeof data.error === "string" ? data.error : "Request failed" };
+  } catch (e) {
+    console.error("analyzeMailsAction:", e);
+    return { ok: false, error: "Sync failed during database check" };
   }
 }

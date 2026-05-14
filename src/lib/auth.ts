@@ -3,7 +3,7 @@ import type { DefaultSession, Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { Account, User } from "next-auth";
 import Google from "next-auth/providers/google";
-import { syncOAuthUserToDatabase } from "@/lib/oauthDbSync";
+import { upsertOAuthUserFromCredentials } from "@/app/api/_db/user";
 
 declare module "next-auth" {
   interface Session {
@@ -47,7 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           (typeof token.email === "string" ? token.email : undefined);
         if (userId && email) {
           try {
-            await syncOAuthUserToDatabase({
+            await upsertOAuthUserFromCredentials({
               userId,
               email,
               name: user?.name,

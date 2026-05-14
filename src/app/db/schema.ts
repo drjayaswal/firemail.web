@@ -5,6 +5,7 @@ import {
   timestamp,
   index,
   uniqueIndex,
+  decimal,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -21,6 +22,8 @@ export const encryptedMail = pgTable("encrypted_mail", {
   gmailMessageId: text("gmail_message_id").notNull(),
   ciphertext: text("ciphertext").notNull(),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
+  categories: text("categories").array(),
+  priority: decimal("priority", { precision: 10, scale: 4 }).notNull().default("0.0000"),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 }, (table) => [
   uniqueIndex("encrypted_mail_user_message_uq").on(table.userId, table.gmailMessageId),

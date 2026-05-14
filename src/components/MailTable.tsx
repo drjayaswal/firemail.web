@@ -1,7 +1,6 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -10,13 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Mail } from '@/types';
@@ -62,7 +54,7 @@ export default function MailTable({
             ) : mails.length === 0 ? (
               <TableRow className="border-transparent hover:bg-transparent">
                 <TableCell colSpan={4} className="h-48 text-center text-muted-foreground  text-xs uppercase tracking-widest">
-                  No telemetry data found.
+                  No telemetry data found
                 </TableCell>
               </TableRow>
             ) : (

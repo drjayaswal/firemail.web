@@ -9,19 +9,20 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { CloudDownloadIcon, DatabaseBackupIcon, DatabaseZapIcon } from 'lucide-react';
 
 interface FetchMailsConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUseCached: () => void;
-  onFetchFromGmail: () => void;
+  onFetchFromCache: () => void;
+  onFetchFromCloud: () => void;
 }
 
 export default function FetchMailsConfirmDialog({
   open,
   onOpenChange,
-  onUseCached,
-  onFetchFromGmail,
+  onFetchFromCache,
+  onFetchFromCloud,
 }: FetchMailsConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -29,29 +30,31 @@ export default function FetchMailsConfirmDialog({
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-xl tracking-tight text-white">Load inbox</DialogTitle>
           <DialogDescription className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            Choose cached index or live Gmail sync
+            Choose cached emails or fetch emails from Cloud
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="mt-4 flex gap-3 justify-center items-center">
+        <DialogFooter className="flex gap-3 justify-center items-center">
           <Button
             type="button"
             variant="accent"
             onClick={() => {
-              onFetchFromGmail();
+              onFetchFromCloud();
               onOpenChange(false);
             }}
           >
-            Fetch from Gmail
+            <CloudDownloadIcon/>
+            Cloud
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant="no_outline"
             onClick={() => {
-              onUseCached();
+              onFetchFromCache();
               onOpenChange(false);
             }}
           >
-            Use cached
+            <DatabaseZapIcon className=''/>
+            Cache
           </Button>
         </DialogFooter>
       </DialogContent>

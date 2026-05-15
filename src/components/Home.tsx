@@ -185,7 +185,7 @@ export default function Home({
   );
 
   if (appLoading) {
-    return <Loader onComplete={() => setAppLoading(false)} />;
+    return <Loader message={"Indexing"} onComplete={() => setAppLoading(false)} />;
   }
 
   return (

@@ -31,6 +31,12 @@ export const encryptedMail = pgTable("encrypted_mail", {
   index("encrypted_mail_user_idx").on(table.userId),
 ]);
 
+export const categories = pgTable("categories", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+});
+
 export const encryptedMailRelations = relations(encryptedMail, ({ one }) => ({
   user: one(user, { fields: [encryptedMail.userId], references: [user.id] }),
 }));

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function Loader({ onComplete }: { onComplete?: () => void }) {
+export default function Loader({ onComplete, message }: { onComplete?: () => void, message: string }) {
   const [speedFactor, setSpeedFactor] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
 
@@ -37,7 +37,7 @@ export default function Loader({ onComplete }: { onComplete?: () => void }) {
         animate={isExiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <div className="text-white text-[9px] uppercase tracking-widest ">Indexing</div>
+        <div className="text-white text-[9px] uppercase tracking-widest ">{message}</div>
         <div className="h-0.5 w-full relative bg-white/20 rounded-sm overflow-hidden">
           <motion.div
             className="absolute inset-y-0 left-0 bg-accent rounded-sm z-10"

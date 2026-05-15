@@ -9,9 +9,11 @@ export type MailSyncResponse =
   | { ok: true; count: number }
   | { ok: false; error: string };
 
-export async function POST(): Promise<NextResponse<MailSyncResponse>> {
+export async function POST(request: Request): Promise<NextResponse<MailSyncResponse>> {
   const session = await auth();
   const userId = session?.user?.id;
+  const body = await request.json();
+  const count = body?.count;
   if (!userId) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
@@ -26,7 +28,7 @@ export async function POST(): Promise<NextResponse<MailSyncResponse>> {
 
   let mails;
   try {
-    mails = await getMails();
+    mails = await getMails(count);
   } catch {
     return NextResponse.json({ ok: false, error: "Could not load mail from Gmail" }, { status: 502 });
   }

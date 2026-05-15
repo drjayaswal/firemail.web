@@ -1,24 +1,26 @@
 "use server";
 
 import { fetchInternalApi } from "@/lib/internal-api";
-import { getMails, getCustomMails } from "@/lib/action";
+import { getMails } from "@/lib/action";
 import type { AnalyzeOptions, Mail } from "@/types";
 
-export async function fetchMailsAction(): Promise<Mail[]> {
+export async function fetchMailsAction(count:number): Promise<Mail[]> {
   try {
-    return await getMails();
+    return await getMails(count);
   } catch {
     return [];
   }
 }
 
-export async function syncEncryptedMailsToDb(): Promise<{
+export async function syncEncryptedMailsToDb(count:number): Promise<{
   ok: boolean;
   count?: number;
   error?: string;
 }> {
   try {
-    const res = await fetchInternalApi("/api/mail/sync", { method: "POST" });
+    const res = await fetchInternalApi("/api/mail/sync", { method: "POST" },{
+      count:count
+    });
     const data = (await res.json()) as { ok?: boolean; count?: number; error?: string };
     if (!res.ok) {
       return { ok: false, error: typeof data.error === "string" ? data.error : "Sync failed" };

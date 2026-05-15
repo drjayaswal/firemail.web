@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Toaster } from "sonner";
 import Loading from "./loading";
 import "./globals.css";
+import { Toaster } from "@/components/Toaster";
 
 export const metadata: Metadata = {
   title: "fathom²ail",
@@ -35,29 +35,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              width: "fit-content",
-              background: "#000000",
-              border: "1px solid #000000",
-              borderRadius: "15px",
-              padding: "10px 16px",
-              fontSize: "14px",
-              fontWeight: "500",
-              color: "#d7df23",
-              boxShadow: "0 0px 0px rgba(0, 0, 0, 0.05)",
-            },
-            actionButtonStyle: {
-              background: "#d7df23",
-              color: "#000000",
-              borderRadius: "7px",
-              fontSize: "12px",
-              marginLeft: "10px"
-            }
-          }} />
+      <body className="min-h-full flex flex-col select-none">
+        <Toaster/>
         <Suspense fallback={<Loading />}>
           {children}
         </Suspense>

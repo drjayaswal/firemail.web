@@ -76,7 +76,7 @@ export default function AnalyzeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-xl border border-border bg-background/95 backdrop-blur-2xl sm:max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+      <DialogContent className="rounded-xl border border-white/20 bg-black sm:max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader className="space-y-3">
             <DialogTitle className="text-xl tracking-tight text-white">Analyze Mails</DialogTitle>
@@ -141,9 +141,9 @@ export default function AnalyzeDialog({
             </div>
           </div>
 
-          <DialogFooter className="pt-4">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <DialogFooter className="bg-black flex items-center justify-between! border-white/20">
             <Button type="submit" variant="accent"><Wand2Icon/>Analyze</Button>
+            <Button type="button" variant="no_outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -21,7 +21,7 @@ interface HeaderProps {
   onAnalyze: () => void;
   onFetch: () => void;
   onSignOut: () => void;
-  onSyncCloud: () => void;
+  onSyncDatabase: (count: number) => void;
   sessionUserEmail?: string | null;
 }
 
@@ -34,7 +34,7 @@ export default function Header({
   onAnalyze,
   onSignOut,
   onFetch,
-  onSyncCloud,
+  onSyncDatabase,
   sessionUserEmail,
 }: HeaderProps) {
   return (
@@ -85,7 +85,7 @@ export default function Header({
           <Button
             type="button"
             variant="ghost"
-            onClick={onSyncCloud}
+            onClick={()=>onSyncDatabase(10)}
             disabled={syncing}
             className="shrink-0"
           >

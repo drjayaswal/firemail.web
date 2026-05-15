@@ -2,7 +2,7 @@ import { google } from 'googleapis';
 import { auth } from '@/lib/auth';
 import { AnalyzeOptions, Mail } from '@/types';
 
-export async function getMails(): Promise<Mail[]> {
+export async function getMails(count:number): Promise<Mail[]> {
   const session = await auth();
   if (!session?.accessToken) {
     throw new Error('Unauthorized: No access token');
@@ -16,7 +16,7 @@ export async function getMails(): Promise<Mail[]> {
   try {
     const res = await gmail.users.messages.list({
       userId: 'me',
-      maxResults: 6,
+      maxResults: count,
     });
 
     const messages = res.data.messages || [];

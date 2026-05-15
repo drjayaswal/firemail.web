@@ -9,7 +9,6 @@ export interface Mail {
   labels: string[];
   createdAt: string;
   categories?: string[] | null;
-  /** `decimal(10,4)` from DB, e.g. `"0.0000"`. */
   priority?: string;
 }
 

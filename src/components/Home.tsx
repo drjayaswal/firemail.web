@@ -7,10 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { fetchMailsAction, analyzeMailsAction, syncEncryptedMailsToDb } from '@/app/actions';
 import { AnalyzeOptions, Mail } from '@/types';
 import { signOut } from 'next-auth/react';
-import { toast } from 'sonner';
 import { readMailsFromCache, writeMailsToCache } from '@/lib/mailCache';
-
-import SiphonLoader from './Loader';
 import Header from './Header';
 import MailTable from './MailTable';
 import MailSheet from './MailSheet';
@@ -20,6 +17,9 @@ import FetchDialog from './FetchDialog';
 import AnalyzeDialog from './AnalyzeDialog';
 import AnalyzedMailsPriorityGraph from './AnalyzedMailsPriorityGraph';
 import { apiRequest } from '@/lib/api';
+import { toast } from '@/lib/toast';
+import { Button } from './ui/button';
+import Loader from './Loader';
 
 type SystemStatus = 'Active' | 'Standby' | 'Processing' | 'Offline';
 
@@ -47,7 +47,7 @@ export default function Home({
   const [fetchDialogOpen, setFetchDialogOpen] = useState(false);
   const [analyzeDialogOpen, setAnalyzeDialogOpen] = useState(false);
   const [analyzedExistingMails, setAnalyzedExistingMails] = useState<Mail[]>([]);
-
+  const [fetchMailsCount, setFetchMailsCount] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [detailMail, setDetailMail] = useState<Mail | null>(null);
   const [serviceStatus, setServiceStatus] = useState<SystemStatus>('Active');
@@ -65,30 +65,30 @@ export default function Home({
   const handleFetchFromCache = () => {
     const cached = readMailsFromCache(sessionUserEmail);
     if (cached.length === 0) {
-      toast.error('No Cache found!');
+      toast.error('No New Message!');
       return;
     }
     setMails(cached);
-    toast.success('Cache Loaded!');
+    toast.success(`${cached.length > 1 ? "Messages" : "Message"} Loaded!`);
   };
 
-  const handleFetchFromCloud = () => {
+  const handleFetchFromCloud = (count: number) => {
     void (async () => {
       setLoading(true);
       setServiceStatus("Standby")
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setServiceStatus("Processing")
-        const data = await fetchMailsAction();
+        const data = await fetchMailsAction(count);
         setMails(data);
         writeMailsToCache(sessionUserEmail, data);
         if (data.length === 0) {
           toast.error('No New Messages!');
         } else {
-          toast.success('Messages Synched!');
+          toast.success(`${data.length} ${data.length > 1 ? "Messages" : "Message"} Loaded!`);
         }
-      } catch {
-        toast.error('Protocol failure: Could not retrieve new messages');
+      } catch(e) {
+        console.log(e)
       } finally {
         setLoading(false);
         setServiceStatus(serviceStatus)
@@ -142,9 +142,9 @@ export default function Home({
         // } else {
         //   toast.success('New Messages Synched!');
         // }
-        toast.dismiss(toastId)
+        toast.remove(toastId)
       } catch {
-        toast.error('Protocol failure: Could not retrieve new messages');
+        console.error('Protocol failure: Could not retrieve new messages');
       } finally {
         setOrchestratorStatus(orchestratorStatus)
         setAnalyzing(false);
@@ -152,7 +152,7 @@ export default function Home({
     })();
   };
 
-  const handleSyncCloud = () => {
+  const handleSyncDatabase = (count:number) => {
     void (async () => {
       if (!sessionUserId) {
         toast.error('Session not linked to User!');
@@ -161,13 +161,13 @@ export default function Home({
       setSyncing(true);
       setServiceStatus("Standby")
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setServiceStatus("Processing")
-        const result = await syncEncryptedMailsToDb();
+        const result = await syncEncryptedMailsToDb(count);
         if (!result.ok) {
-          toast.error(result.error ?? 'Cloud sync failed!');
+          toast.error(result.error ?? 'Database sync failed!');
         } else {
-          toast.success(`Cloud Synched!`);
+          toast.success(`Database Synched!`);
         }
       } finally {
         setSyncing(false);
@@ -183,7 +183,7 @@ export default function Home({
   );
 
   if (appLoading) {
-    return <SiphonLoader onComplete={() => setAppLoading(false)} />;
+    return <Loader onComplete={() => setAppLoading(false)} />;
   }
 
   return (
@@ -203,7 +203,7 @@ export default function Home({
           onSignOut={handleSignOut}
           onAnalyze={() => setAnalyzeDialogOpen(true)}
           onFetch={() => setFetchDialogOpen(true)}
-          onSyncCloud={handleSyncCloud}
+          onSyncDatabase={handleSyncDatabase}
           sessionUserEmail={sessionUserEmail}
         />
         <Card className="min-w-0 overflow-hidden">
@@ -317,6 +317,8 @@ export default function Home({
       <MailSheet mail={detailMail} onClose={() => setDetailMail(null)} />
 
       <FetchDialog
+        fetchMailsCount={fetchMailsCount}
+        setFetchMailsCount={setFetchMailsCount}
         open={fetchDialogOpen}
         onOpenChange={setFetchDialogOpen}
         onFetchFromCache={handleFetchFromCache}

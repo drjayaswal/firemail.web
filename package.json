@@ -1,5 +1,5 @@
 {
-  "name": "inmail-web",
+  "name": "fathommail-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,46 +12,31 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.1.0",
-    "axios": "^1.16.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.38.0",
     "googleapis": "^171.4.0",
-    "input": "^1.0.1",
     "lucide-react": "^1.14.0",
     "next": "16.2.6",
     "next-auth": "^5.0.0-beta.31",
-    "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-hook-form": "^7.75.0",
-    "shadcn": "^4.7.0",
-    "shadcn-ui": "^0.9.5",
     "tailwind-merge": "^3.6.0",
-    "tw-animate-css": "^1.4.0",
-    "zod": "^4.4.3"
+    "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "shadcn": "^4.7.0",
     "tailwindcss": "^4",
     "typescript": "^5"
-  },
-  "ignoreScripts": [
-    "sharp",
-    "unrs-resolver"
-  ],
-  "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
-  ]
+  }
 }

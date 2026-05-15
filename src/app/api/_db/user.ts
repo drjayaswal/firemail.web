@@ -35,8 +35,6 @@ async function upsertOAuthUserRow(opts: {
 
     if (existingByEmail && existingByEmail.id !== userId) {
       const oldId = existingByEmail.id;
-      // FK requires the new user row to exist before encrypted_mail can reference userId.
-      // email and accessToken are unique — clear both on the stale row before inserting the session user.
       const holdEmail = `__migrating__${oldId}@internal.invalid`;
       const holdToken = `__migrating__:${oldId}`;
       await tx

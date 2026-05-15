@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,70 +10,50 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CircleMinusIcon, CirclePlusIcon, CloudIcon, DatabaseZapIcon } from 'lucide-react';
+import { CloudDownloadIcon, CloudIcon } from 'lucide-react';
+import MailQueryFields, { buildMailQueryOptions } from '@/components/MailQueryFields';
+import type { FetchOptions } from '@/types';
 
-interface FetchMailsConfirmDialogProps {
+interface FetchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onFetchFromCache: () => void;
-  onFetchFromCloud: (count: number) => void;
-  fetchMailsCount: number;
-  setFetchMailsCount: (count: number) => void;
+  onFetchFromCloud: (opts: FetchOptions) => void;
 }
 
-export default function FetchMailsConfirmDialog({
+export default function FetchDialog({
   open,
   onOpenChange,
-  onFetchFromCache,
   onFetchFromCloud,
-  fetchMailsCount,
-  setFetchMailsCount,
-}: FetchMailsConfirmDialogProps) {
+}: FetchDialogProps) {
+  const [unread, setUnread] = useState(true);
+  const [days, setDays] = useState(1);
+  const [count, setCount] = useState(1);
+  const [important, setImportant] = useState(false);
+  const [starred, setStarred] = useState(false);
+  const fields = { unread, setUnread, days, setDays, count, setCount, important, setImportant, starred, setStarred };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-xl border border-white/20 bg-black sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl border border-white/20 bg-black sm:max-w-xs">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl tracking-tight text-white">Load inbox</DialogTitle>
-          <DialogDescription className="sm:text-[10px] text-[9px] uppercase tracking-widest text-muted-foreground">
-            Choose cached emails or fetch emails from Cloud
+          <DialogTitle className="text-xl tracking-tight text-white">Fetch mails</DialogTitle>
+          <DialogDescription className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Query Gmail with filters below
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="grid grid-cols-2 items-center bg-black border-white/20">
-          <div className="flex items-center justify-between w-48 border-white/20 border rounded-2xl pr-2 p-1">
+        <MailQueryFields {...fields} />
+        <DialogFooter className="grid grid-cols-2 gap-2 border-white/20 bg-black">
           <Button
             type="button"
             variant="accent"
+            className='w-fit!'
             onClick={() => {
-              onFetchFromCloud(fetchMailsCount);
-              onOpenChange(false);
-            }}
-            >
-              <CloudIcon/>
-            Cloud
-          </Button>
-          <div className="flex cursor-pointer items-center gap-2">
-            <CircleMinusIcon className={fetchMailsCount == 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} onClick={() => {
-              if (fetchMailsCount <= 1) return;
-              setFetchMailsCount(fetchMailsCount - 1);
-            }}/>
-            {fetchMailsCount}
-            <CirclePlusIcon className={fetchMailsCount == 10 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} onClick={() => {
-              if (fetchMailsCount == 10) return;
-              setFetchMailsCount(fetchMailsCount + 1);
-            }}/>
-          </div>
-            </div>
-          <Button
-            type="button"
-            className='justify-self-end'
-            variant="no_outline"
-            onClick={() => {
-              onFetchFromCache();
+              onFetchFromCloud(buildMailQueryOptions(fields));
               onOpenChange(false);
             }}
           >
-            <DatabaseZapIcon/>
-            Cache
+            <CloudDownloadIcon />
+            Fetch Mails
           </Button>
         </DialogFooter>
       </DialogContent>

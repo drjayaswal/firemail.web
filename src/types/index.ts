@@ -12,16 +12,26 @@ export interface Mail {
   priority?: string;
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-}
-
-export interface AnalyzeOptions {
+export interface MailQueryOptions {
   unread: boolean;
   days: number;
-  store: boolean;
   count: number;
   important: boolean;
   starred: boolean;
+}
+
+export type FetchOptions = MailQueryOptions;
+
+export interface AnalyzeOptions extends MailQueryOptions {
+  store: boolean;
+}
+
+export interface AnalyzeCheckRequest {
+  mails: Mail[];
+  store: boolean;
+}
+
+export interface AnalyzeRunPayload {
+  mails: Mail[];
+  options: AnalyzeOptions;
 }

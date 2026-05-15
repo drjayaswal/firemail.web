@@ -1,28 +1,41 @@
 "use server";
 
 import { fetchInternalApi } from "@/lib/internal-api";
-import { getMails } from "@/lib/action";
-import type { AnalyzeOptions, Mail } from "@/types";
+import type { AnalyzeOptions, FetchOptions, Mail } from "@/types";
+import { deriveAnalyzeOptionsFromMails } from "@/lib/derive-analyze-options";
 
-export async function fetchMailsAction(count:number): Promise<Mail[]> {
+export async function fetchMailsAction(options: FetchOptions): Promise<{
+  ok: boolean;
+  mails?: Mail[];
+  error?: string;
+}> {
   try {
-    return await getMails(count);
+    const res = await fetchInternalApi("/api/mail/fetch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(options),
+    });
+    const data = (await res.json()) as { ok?: boolean; mails?: Mail[]; error?: string };
+    if (!res.ok || !data.ok) {
+      return { ok: false, error: typeof data.error === "string" ? data.error : "Fetch failed" };
+    }
+    return { ok: true, mails: data.mails ?? [] };
   } catch {
-    return [];
+    return { ok: false, error: "Fetch failed" };
   }
 }
 
-export async function syncEncryptedMailsToDb(count:number): Promise<{
+export async function syncEncryptedMailsToDb(mails: Mail[]): Promise<{
   ok: boolean;
   count?: number;
   error?: string;
 }> {
   try {
-    const res = await fetchInternalApi("/api/mail/sync", { method: "POST",
-      body: JSON.stringify({
-        count:count
-      }),
-     });
+    const res = await fetchInternalApi("/api/mail/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mails }),
+    });
     const data = (await res.json()) as { ok?: boolean; count?: number; error?: string };
     if (!res.ok) {
       return { ok: false, error: typeof data.error === "string" ? data.error : "Sync failed" };
@@ -36,17 +49,22 @@ export async function syncEncryptedMailsToDb(count:number): Promise<{
   }
 }
 
-export async function analyzeMailsAction(options: AnalyzeOptions): Promise<{
+export async function analyzeMailsAction(
+  mails: Mail[],
+  store: boolean,
+): Promise<{
   ok: boolean;
   existingInDb?: Mail[];
   missingInDb?: Mail[];
+  options?: AnalyzeOptions;
   error?: string;
 }> {
+  const options = deriveAnalyzeOptionsFromMails(mails, store);
   try {
     const res = await fetchInternalApi("/api/mail/analyze-check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(options),
+      body: JSON.stringify({ mails, store }),
     });
     const data = (await res.json()) as {
       ok?: boolean;
@@ -58,11 +76,10 @@ export async function analyzeMailsAction(options: AnalyzeOptions): Promise<{
       return { ok: false, error: typeof data.error === "string" ? data.error : "Request failed" };
     }
     if (data.ok === true && Array.isArray(data.existingInDb) && Array.isArray(data.missingInDb)) {
-      return { ok: true, existingInDb: data.existingInDb, missingInDb: data.missingInDb };
+      return { ok: true, existingInDb: data.existingInDb, missingInDb: data.missingInDb, options };
     }
     return { ok: false, error: typeof data.error === "string" ? data.error : "Request failed" };
-  } catch (e) {
-    console.error("analyzeMailsAction:", e);
-    return { ok: false, error: "Sync failed during database check" };
+  } catch {
+    return { ok: false, error: "Analyze check failed" };
   }
 }

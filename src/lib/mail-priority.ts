@@ -1,4 +1,3 @@
-/** DB `encrypted_mail.priority`: `decimal(10,4)` as string (e.g. `"0.0000"`). */
 export const DEFAULT_MAIL_PRIORITY = "0.0000";
 
 export function parseMailPriority(value: string | undefined | null): number {

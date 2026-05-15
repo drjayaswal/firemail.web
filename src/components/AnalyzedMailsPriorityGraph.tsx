@@ -116,9 +116,9 @@ export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Prop
         </TooltipProvider>
       </section>
 
-      <Dialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)}>
+      {preview ? (
+      <Dialog open onOpenChange={(open) => !open && setPreview(null)}>
         <DialogContent className="sm:max-w-md" showCloseButton>
-          {preview && (
             <>
               <DialogHeader>
                 <DialogTitle className="line-clamp-2 pr-8">{preview.sender.split("<")[0]}</DialogTitle>
@@ -174,9 +174,9 @@ export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Prop
                 </Button>
               </div>
             </>
-          )}
         </DialogContent>
       </Dialog>
+      ) : null}
     </>
   );
 }

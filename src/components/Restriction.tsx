@@ -10,7 +10,7 @@ const Restriction = () => {
           alt="Fathommail"
           width={240}
           height={80}
-          className="object-contain mx-auto"
+          className="mx-auto h-auto w-auto object-contain"
           priority
         />
       </div>

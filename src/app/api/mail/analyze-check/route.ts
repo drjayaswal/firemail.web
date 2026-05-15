@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { getCustomMails } from "@/lib/action";
 import { ensureUserRowFromSession } from "@/app/api/_db/user";
 import {
   getCategoriesAndPriorityByGmailIds,
   getExistingGmailMessageIdsForUser,
 } from "@/app/api/_db/encrypted-mail";
-import type { AnalyzeOptions, Mail } from "@/types";
+import type { AnalyzeCheckRequest, Mail } from "@/types";
 import { DEFAULT_MAIL_PRIORITY } from "@/lib/mail-priority";
 
 export type AnalyzeCheckResponse =
@@ -20,26 +19,21 @@ export async function POST(req: Request): Promise<NextResponse<AnalyzeCheckRespo
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  let options: AnalyzeOptions;
+  let body: AnalyzeCheckRequest;
   try {
-    options = (await req.json()) as AnalyzeOptions;
+    body = (await req.json()) as AnalyzeCheckRequest;
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
+  const mails = Array.isArray(body.mails) ? body.mails : [];
+
   const ensured = await ensureUserRowFromSession(session);
   if (!ensured) {
     return NextResponse.json(
-      { ok: false, error: "Missing user id or email for vault" },
+      { ok: false, error: "Missing user id or email" },
       { status: 400 },
     );
-  }
-
-  let mails: Mail[];
-  try {
-    mails = await getCustomMails(options);
-  } catch {
-    return NextResponse.json({ ok: false, error: "Could not load mail from Gmail" }, { status: 502 });
   }
 
   if (mails.length === 0) {
@@ -71,8 +65,7 @@ export async function POST(req: Request): Promise<NextResponse<AnalyzeCheckRespo
     });
 
     return NextResponse.json({ ok: true, existingInDb: existingInDbWithStoreFields, missingInDb });
-  } catch (e) {
-    console.error("analyze-check db error:", e);
+  } catch {
     return NextResponse.json({ ok: false, error: "Sync failed during database check" }, { status: 500 });
   }
 }

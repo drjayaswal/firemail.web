@@ -1,119 +1,196 @@
-# fathom²ail
+# Fathommail Web
 
-A production-oriented Next.js dashboard for Gmail: read-only OAuth, browser caching, optional encrypted cloud backup, and a motion-first UI built with Tailwind CSS v4 and Framer Motion.
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![Drizzle ORM](https://img.shields.io/badge/Drizzle-ORM-000?logo=drizzle)](https://orm.drizzle.team/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
----
+A Next.js dashboard for Gmail: read-only OAuth, encrypted local vault (IndexedDB), optional AES-256-GCM cloud backup in Postgres, AI-assisted mail analysis, and a motion-first UI.
 
-## Overview
-
-| Capability | Description |
-|------------|-------------|
-| **Inbox** | Fetches a bounded set of messages via the Gmail API after explicit user action. |
-| **Cache** | Persists the last successful result in `localStorage` per signed-in email. |
-| **Cloud sync** | Optionally writes AES-256-GCM–encrypted message payloads to Postgres (`encrypted_mail`). |
-| **Voice** | Client-side speech-to-text for search input (browser APIs). |
-
-Legal and security disclosure for end users: **[Privacy & security](/policy)** · **[Terms of use](/terms)** · Dedicated route: **`/notfound`**. Unmatched URLs render the global **404** UI from [`src/app/not-found.tsx`](src/app/not-found.tsx).
+**Live stack:** Next.js App Router · NextAuth (Google) · Gmail API · Drizzle + Postgres (Neon) · Framer Motion · Radix UI · Tailwind CSS v4
 
 ---
 
-## Architecture
+## Features
 
-- **App Router** (Next.js 16): server actions for Gmail fetch and vault sync, API route for NextAuth.
-- **Auth**: NextAuth.js with Google provider (`gmail.readonly` scope). Session carries short-lived access context; sign-in flow can upsert a minimal `user` row for foreign keys used by the vault.
-- **Data**: Drizzle ORM + Postgres (e.g. Neon). Schema lives in [`src/app/db/schema.ts`](src/app/db/schema.ts).
-- **Crypto**: [`src/lib/mail-crypto.ts`](src/lib/mail-crypto.ts) — AES-256-GCM over JSON payloads; key material from `MAIL_ENCRYPTION_KEY` or `AUTH_SECRET` (see policy page for limits).
+| Area | Description |
+|------|-------------|
+| **Fetch** | Query Gmail with read/unread, lookback days, count, important, and starred filters. |
+| **Local vault** | Fetched mail encrypted in the browser (AES-GCM, key derived from user id + email). |
+| **Analyze** | Select fetched mail, run AI analysis with options derived from the selection; optional store to DB. |
+| **Cloud vault** | Manually sync selected analyzed mail to Postgres (`encrypted_mail`) with server-side encryption. |
+| **Tabs** | Separate **Fetched** and **Analyzed** inboxes with search and detail sheet. |
+
+---
+
+## Quick start
+
+### Prerequisites
+
+- Node.js 20+ or [Bun](https://bun.sh)
+- Google Cloud OAuth client (Gmail API enabled)
+- Postgres database (e.g. [Neon](https://neon.tech))
+- Optional: separate [AI server](https://github.com) exposing `POST /analyze/mails`
+
+### Install
+
+```bash
+git clone https://github.com/YOUR_ORG/fathommail.web.git
+cd fathommail.web
+cp .env.example .env.local
+```
+
+Fill in `.env.local` (see [Environment](#environment)), then:
+
+```bash
+bun install
+bun run db:push
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
 ## Environment
 
-Create `.env.local` (values are examples; use strong secrets in production):
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `AUTH_SECRET` | Yes | NextAuth signing secret ([generate](https://generate-secret.vercel.app/32)) |
+| `AUTH_GOOGLE_ID` | Yes | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | Yes | Google OAuth client secret |
+| `DATABASE_URL` | Yes | Postgres connection string |
+| `MAIL_ENCRYPTION_KEY` | Recommended | Dedicated key for vault ciphertext (32+ chars) |
+| `NEXTAUTH_URL` | Yes (prod) | App URL, e.g. `http://localhost:3000` |
+| `AI_SERVER_URL` | For analyze | Base URL of the analysis API |
+| `ADMIN_EMAIL` | Optional | Email allowed to access `/admin` |
 
-```env
-AUTH_SECRET=
-AUTH_GOOGLE_ID=
-AUTH_GOOGLE_SECRET=
-DATABASE_URL=
-MAIL_ENCRYPTION_KEY=
-NEXT_PUBLIC_API_URL=http://localhost:8000
+Google OAuth redirect URI: `{NEXTAUTH_URL}/api/auth/callback/google`  
+Scope used: `openid email profile https://www.googleapis.com/auth/gmail.readonly`
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `bun dev` | Development server |
+| `bun run build` | Production build |
+| `bun start` | Start production server |
+| `bun run lint` | ESLint |
+| `bun run db:generate` | Drizzle migrations (generate) |
+| `bun run db:push` | Push schema to database |
+| `bun run db:studio` | Drizzle Studio |
+
+---
+
+## Architecture
+
+```text
+Browser (Home)
+  ├─ Fetch → POST /api/mail/fetch → Gmail API
+  ├─ Vault  → IndexedDB (client AES-GCM)
+  ├─ Analyze → analyzeMailsAction → POST /api/mail/analyze-check
+  │            → AI_SERVER_URL/analyze/mails
+  └─ Sync   → POST /api/mail/sync → encrypted_mail (Postgres)
+
+Auth → /api/auth/[...nextauth] (NextAuth + Google)
 ```
 
-| Variable | Role |
-|----------|------|
-| `AUTH_SECRET` | NextAuth signing / fallback key derivation. |
-| `AUTH_GOOGLE_*` | Google OAuth client. |
-| `DATABASE_URL` | Postgres connection for Drizzle. |
-| `MAIL_ENCRYPTION_KEY` | Preferred dedicated secret for vault encryption. |
-| `NEXT_PUBLIC_API_URL` | Optional external API base for client-side mail mutations. |
+### API routes
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/mail/fetch` | POST | Fetch mail from Gmail with query options |
+| `/api/mail/analyze-check` | POST | Partition selected mail vs DB; attach categories/priority |
+| `/api/mail/sync` | POST | Upsert selected mail ciphertext into `encrypted_mail` |
+| `/api/auth/[...nextauth]` | * | Session and OAuth |
+
+### Database schema
+
+- `user` — OAuth user row (id, email, accessToken, createdAt)
+- `encrypted_mail` — per-user encrypted JSON payloads, categories, priority (`decimal(10,4)`)
+
+Defined in [`src/app/db/schema.ts`](src/app/db/schema.ts).
 
 ---
 
-## Local development
+## Project structure
 
-**Requirements:** Node.js 20+ (or Bun).
-
-```bash
-npm install
-npm run dev
+```text
+src/
+├── app/
+│   ├── actions.ts          # Server actions (fetch, analyze, sync)
+│   ├── api/mail/           # Route handlers
+│   ├── api/auth/           # NextAuth
+│   ├── db/                 # Drizzle schema + client
+│   ├── admin/              # Admin gate (ADMIN_EMAIL)
+│   ├── policy/             # Privacy & security
+│   └── terms/              # Terms of use
+├── components/             # UI (Home, tables, dialogs, graph)
+├── lib/                    # Gmail, crypto, vault, auth, API client
+└── types/                  # Shared TypeScript types
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+---
 
-```bash
-npm run build
-npm run lint
+## Analyze payload
+
+The AI server should accept:
+
+```json
+{
+  "mails": [/* Mail[] */],
+  "options": {
+    "unread": true,
+    "days": 3,
+    "count": 5,
+    "important": false,
+    "starred": false,
+    "store": false
+  }
+}
 ```
 
----
-
-## Database
-
-Push schema to your database before using cloud sync:
-
-```bash
-npm run db:generate
-npm run db:push
-npm run db:studio
-```
-
-Tables include `user` and `encrypted_mail` (see Drizzle schema). Apply migrations in CI/CD for production.
+`options` are derived from the selected mail batch (dates, status, labels, count). Only `store` is chosen in the UI.
 
 ---
 
-## Product behavior (concise)
+## Legal pages
 
-1. **Load:** Reads cache from `localStorage` if present; does not call Gmail on first paint.
-2. **Fetch:** User confirms **cached** vs **live Gmail**; live path runs a server action, then refreshes cache.
-3. **Sync:** Server loads mail from Gmail again, encrypts, and upserts into `encrypted_mail` (avoids shipping large bodies through server-action arguments).
-
----
-
-## Repository layout (partial)
-
-| Path | Purpose |
-|------|---------|
-| `src/app/page.tsx` | Landing / auth gate and main dashboard entry. |
-| `src/components/Home.tsx` | Client shell: cache, fetch dialog, table, sync. |
-| `src/lib/action.ts` | Gmail API integration. |
-| `src/app/actions.ts` | Server actions: fetch, encrypted sync. |
-| `src/app/terms`, `src/app/policy`, `src/app/notfound` | Legal and utility pages. |
-| `src/app/not-found.tsx` | Global 404 UI. |
+- [Privacy & security](/policy) — `src/app/policy/page.tsx`
+- [Terms of use](/terms) — `src/app/terms/page.tsx`
 
 ---
 
-## Design tokens
+## Security notes
 
-Primary palette is documented in [`src/app/globals.css`](src/app/globals.css): black background, white foreground, accent `#d7df23`, muted zinc secondary text.
+- Gmail access is **read-only**.
+- Local vault encryption uses Web Crypto; keys are derived from session user id + email (data survives sign-out).
+- Server vault uses **AES-256-GCM** via [`src/lib/mail-crypto.ts`](src/lib/mail-crypto.ts).
+- Never commit `.env` files; use `.env.example` as a template.
 
 ---
 
-## Contributing & standards
+## Contributing
 
-See [`INSTRUCTIONS.md`](INSTRUCTIONS.md) for TypeScript, Tailwind v4, and motion conventions. See [`SKILLS.md`](SKILLS.md) for product design notes.
+1. Fork the repository  
+2. Create a branch: `git checkout -b feat/your-feature`  
+3. Commit and push  
+4. Open a pull request  
+
+Run `bun run lint` and `bun run build` before submitting.
+
+---
+
+## Tags
+
+`nextjs` `react` `typescript` `gmail` `email` `oauth` `drizzle` `postgresql` `encryption` `tailwindcss` `framer-motion` `nextauth` `ai` `dashboard`
 
 ---
 
 ## License
 
-Rights are reserved by the project copyright holder unless a `LICENSE` file in the repository states otherwise.
+[MIT](LICENSE) © Fathommail contributors

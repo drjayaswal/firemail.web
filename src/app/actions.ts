@@ -18,9 +18,11 @@ export async function syncEncryptedMailsToDb(count:number): Promise<{
   error?: string;
 }> {
   try {
-    const res = await fetchInternalApi("/api/mail/sync", { method: "POST" },{
-      count:count
-    });
+    const res = await fetchInternalApi("/api/mail/sync", { method: "POST",
+      body: JSON.stringify({
+        count:count
+      }),
+     });
     const data = (await res.json()) as { ok?: boolean; count?: number; error?: string };
     if (!res.ok) {
       return { ok: false, error: typeof data.error === "string" ? data.error : "Sync failed" };

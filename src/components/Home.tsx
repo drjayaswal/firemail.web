@@ -130,6 +130,8 @@ export default function Home({
           toast.success(`${data.missingInDb?.length}/${Number(data.existingInDb?.length) + Number(data.missingInDb?.length)} Mails Ready for Analysis`);
         }
         const analyzeBody = { newMails: data.missingInDb, existingMails: data.existingInDb, options: opts }
+        console.log(analyzeBody);
+        return
         const toastId = toast.loading("Analyzing...");
         await apiRequest<{ status: number; message: string }>("/analyze/mails", {
           method: "POST",

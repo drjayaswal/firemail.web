@@ -6,7 +6,7 @@ function buildOrigin(): string {
   return "";
 }
 
-export async function fetchInternalApi(path: string, init?: RequestInit,body?:any): Promise<Response> {
+export async function fetchInternalApi(path: string, init?: RequestInit): Promise<Response> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? "http";
@@ -25,6 +25,5 @@ export async function fetchInternalApi(path: string, init?: RequestInit,body?:an
     ...init,
     headers: mergedHeaders,
     cache: "no-store",
-    body: JSON.stringify(body),
   });
 }

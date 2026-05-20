@@ -1,182 +1,419 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Mail } from '@/types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatEmailContent } from '@/lib/utils';
-import { formatMailPriorityDisplay, parseMailPriority } from '@/lib/mail-priority';
+import { formatMailPriorityDisplay, getPriorityColor, getPriorityMessage, parseMailPriority } from '@/lib/mail-priority';
+import { getCategoriesAction } from '@/app/actions';
 
 type Props = {
   mails: Mail[];
   onOpenDetail: (mail: Mail) => void;
 };
 
-function hashToSpreadY(id: string): number {
+function hashSpreadY(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = Math.imul(31, h) + id.charCodeAt(i);
-  const n = (h >>> 0) % 10_000;
-  return (n / 9_999) * 2 - 1;
+  return ((h >>> 0) % 10_000 / 9_999) * 2 - 1;
 }
 
-function priorityToX(priority: number, minP: number, maxP: number): number {
-  if (maxP === minP) return 0;
-  return ((priority - minP) / (maxP - minP)) * 2 - 1;
+function getPriorityForCategory(mail: Mail, catName: string): string | null {
+  const cats = mail.categories;
+  const pris = mail.priority;
+  if (!cats || !pris) return null;
+  const idx = cats.indexOf(catName);
+  if (idx === -1) return null;
+  const val = Array.isArray(pris) ? pris[idx] : idx === 0 ? pris ?? null : null;
+  return val ?? null;
 }
 
-function positionInPlot(xNorm: number, yNorm: number): { left: string; top: string } {
-  const left = 10 + ((xNorm + 1) / 2) * 80;
-  const top = 10 + ((1 - (yNorm + 1) / 2) * 80);
-  return { left: `${left}%`, top: `${top}%` };
+function toPlotPercent(priorityNorm: number, yNorm: number): { left: number; top: number } {
+  const clamped = Math.min(Math.max(priorityNorm, -1), 1);
+  return {
+    left: 8 + ((clamped + 1) / 2) * 84,
+    top: 8 + ((1 - (yNorm + 1) / 2)) * 84,
+  };
+}
+
+function parseSenderName(sender: string): string {
+  return sender.split('<')[0].trim() || sender;
+}
+
+function getDynamicStyles(index: number) {
+  const h = (index * 137.5) % 360;
+  return {
+    main: `hsl(${h}, 85%, 55%)`,
+    bg: `hsla(${h}, 85%, 55%, 0.15)`,
+    border: `hsla(${h}, 85%, 55%, 0.3)`,
+    shadow: `hsla(${h}, 85%, 55%, 0.5)`,
+    ring: `hsla(${h}, 85%, 55%, 0.6)`,
+    text: `hsl(${h}, 90%, 65%)`,
+  };
+}
+
+function getPriorityStyles(pri: number) {
+  const val = Number(pri);
+  let h = 0;
+  let s = 85;
+  let l = 55;
+
+  if (val <= -0.75) {
+    h = 160; s = 80; l = 40;
+  } else if (val <= -0.5) {
+    h = 142; s = 70; l = 45;
+  } else if (val <= -0.25) {
+    h = 174; s = 75; l = 45;
+  } else if (val <= 0) {
+    h = 50; s = 85; l = 48;
+  } else if (val <= 0.25) {
+    h = 40; s = 90; l = 50;
+  } else if (val <= 0.5) {
+    h = 24; s = 90; l = 52;
+  } else if (val <= 0.75) {
+    h = 0; s = 90; l = 55;
+  } else {
+    h = 343; s = 90; l = 50;
+  }
+
+  return {
+    main: `hsl(${h}, ${s}%, ${l}%)`,
+    ring: `hsla(${h}, ${s}%, ${l}%, 0.6)`,
+    shadow: `hsla(${h}, ${s}%, ${l}%, 0.5)`,
+  };
 }
 
 export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Props) {
+  const [activeTab, setActiveTab] = useState(0);
   const [preview, setPreview] = useState<Mail | null>(null);
+  const [fetchedCategories, setFetchedCategories] = useState<{ name: string }[]>([]);
+  const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    (async () => {
+      const result = await getCategoriesAction();
+      if (!result.ok || !result.categories) return;
+      setFetchedCategories(result.categories);
+    })();
+  }, []);
+
+  const validCategories = useMemo(() =>
+    fetchedCategories.filter((cat) =>
+      mails.some((m) => m.categories?.includes(cat.name))
+    ),
+    [fetchedCategories, mails]
+  );
+
+  useEffect(() => {
+    if (activeTab >= validCategories.length && validCategories.length > 0) {
+      setActiveTab(0);
+    }
+  }, [validCategories.length, activeTab]);
+
+  const activeCat = validCategories[activeTab]?.name ?? null;
+
+  const filteredMails = useMemo(() =>
+    activeCat
+      ? mails.filter((m) => m.categories?.includes(activeCat))
+      : [],
+    [mails, activeCat]
+  );
 
   const layout = useMemo(() => {
-    if (mails.length === 0) return [];
-    const priorities = mails.map((m) => parseMailPriority(m.priority));
-    const minP = Math.min(...priorities);
-    const maxP = Math.max(...priorities);
-    return mails.map((mail) => {
-      const p = parseMailPriority(mail.priority);
-      const x = priorityToX(p, minP, maxP);
-      const y = hashToSpreadY(mail.id);
-      return { mail, x, y, minP, maxP };
+    if (!filteredMails.length || !activeCat) return [];
+
+    return filteredMails.map((mail) => {
+      const rawPriority = getPriorityForCategory(mail, activeCat);
+      const priorityVal = parseMailPriority(rawPriority);
+      const yn = hashSpreadY(mail.id);
+      const pos = toPlotPercent(priorityVal, yn);
+      return {
+        mail,
+        priorityVal,
+        rawPriority,
+        left: pos.left,
+        top: pos.top,
+      };
     });
-  }, [mails]);
+  }, [filteredMails, activeCat]);
+
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setSvgSize({ w: el.clientWidth, h: el.clientHeight });
+    });
+    ro.observe(el);
+    setSvgSize({ w: el.clientWidth, h: el.clientHeight });
+    return () => ro.disconnect();
+  }, []);
+
+  const svgPoints = useMemo(() =>
+    layout.map(({ left, top }) => ({
+      x: (left / 100) * svgSize.w,
+      y: (top / 100) * svgSize.h,
+    })),
+    [layout, svgSize]
+  );
+
+  const sortedSegments = useMemo(() => {
+    if (svgPoints.length < 2) return [];
+    const combined = layout.map((item, i) => ({ ...svgPoints[i], priorityVal: item.priorityVal }));
+    const sorted = [...combined].sort((a, b) => a.x - b.x);
+    return sorted.slice(0, -1).map((pt, i) => ({
+      x1: pt.x,
+      y1: pt.y,
+      x2: sorted[i + 1].x,
+      y2: sorted[i + 1].y,
+      colorA: getPriorityStyles(pt.priorityVal).main,
+      colorB: getPriorityStyles(sorted[i + 1].priorityVal).main,
+      id: `seg-${activeTab}-${i}`,
+    }));
+  }, [svgPoints, layout, activeTab]);
 
   if (mails.length === 0) return null;
 
-  const batchMinP = Math.min(...mails.map((m) => parseMailPriority(m.priority)));
-  const batchMaxP = Math.max(...mails.map((m) => parseMailPriority(m.priority)));
-  const previewNormalized =
-    preview != null
-      ? priorityToX(parseMailPriority(preview.priority), batchMinP, batchMaxP)
-      : null;
+
 
   return (
     <>
-      <section className="p-4 sm:p-6">
-        <h3 className="mb-1 text-sm font-medium text-foreground">Analyzed mails</h3>
-        <TooltipProvider delayDuration={200}>
-          <div className="relative mx-auto aspect-4/3 w-full max-w-2xl min-h-[220px] select-none sm:min-h-[280px]">
-            <div className="absolute inset-0">
-              <div className="absolute bottom-2 left-[10%] right-[10%] flex justify-between text-base tabular-nums text-white/50">
-                <span>-1</span>
-                <span>0</span>
-                <span>1</span>
-              </div>
-              <div className="pointer-events-none absolute inset-[10%] border-b border-white/50" />
-              <div className="pointer-events-none absolute left-[10%] right-[10%] top-1/2 border-t border-dashed border-white/5" />
-              <div className="pointer-events-none absolute left-1/2 top-[10%] bottom-[10%] border-l border-dashed border-white/5" />
-            </div>
+      <section className="px-4 py-5 sm:px-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <p className="text-sm font-medium text-black">Priority Analysis</p>
+          <p className="text-xs text-black/40">{filteredMails.length} mail{filteredMails.length !== 1 ? 's' : ''}</p>
+        </div>
 
-            {layout.map(({ mail, x, y }) => {
-              const { left, top } = positionInPlot(x, y);
-              const cats = mail.categories?.filter(Boolean) ?? [];
+        {validCategories.length > 0 && (
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
+            {validCategories.map((cat, idx) => {
               return (
-                <Tooltip key={mail.id}>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label={`Analyzed mail: ${mail.subject}`}
-                      className={cn(
-                        'absolute z-10 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full',
-                        'bg-white/50 cursor-pointer',
-                        'transition-transform hover:scale-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-                      )}
-                      style={{ left, top }}
-                      onClick={() => setPreview(mail)}
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveTab(idx)}
+                  className={cn(
+                    'relative cursor-pointer py-1.5 text-xs font-medium transition-colors duration-200 truncate max-w-[140px] whitespace-nowrap snap-start shrink-0',
+                    activeTab === idx ? 'text-black' : 'text-black/40 hover:text-black'
+                  )}
+                >
+                  {cat.name}
+                  {activeTab === idx && (
+                    <motion.span
+                      layoutId="tab-glide-line"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 w-full rounded-full bg-black"
+                      transition={{ type: 'spring', damping: 24, stiffness: 300 }}
                     />
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="w-fit! flex items-center gap-2 bg-transparent">
-                    {cats.length > 0 ? (
-                      cats.map((cat, idx) => (
-                        <div key={idx} className="mt-1 text-[11px] bg-blue-600 text-white py-1 px-2 rounded-md">
-                          {cat}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="mt-1 text-[11px] opacity-90">No categories</div>
-                    )}
-                  </TooltipContent>
-                </Tooltip>
+                  )}
+                </button>
               );
             })}
           </div>
-        </TooltipProvider>
+        )}
+
+        <div
+          className="relative w-full rounded-xl border border-border/20 overflow-hidden"
+          style={{ aspectRatio: '4/3', minHeight: 200, maxHeight: 340 }}
+        >
+          <svg
+            ref={svgRef}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            aria-hidden
+          >
+            <line x1="8%" y1="92%" x2="92%" y2="92%" stroke="hsl(var(--border))" strokeOpacity="0.5" strokeWidth="1" />
+            <line x1="8%" y1="8%" x2="8%" y2="92%" stroke="hsl(var(--border))" strokeOpacity="0.3" strokeWidth="1" strokeDasharray="3 4" />
+            <line x1="50%" y1="8%" x2="50%" y2="92%" stroke="hsl(var(--border))" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="3 4" />
+            <line x1="8%" y1="50%" x2="92%" y2="50%" stroke="hsl(var(--border))" strokeOpacity="0.1" strokeWidth="1" strokeDasharray="3 4" />
+
+            <defs>
+              {sortedSegments.map((seg) => (
+                <linearGradient
+                  key={`grad-${seg.id}`}
+                  id={`grad-${seg.id}`}
+                  gradientUnits="userSpaceOnUse"
+                  x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2}
+                >
+                  <stop offset="0%" stopColor={seg.colorA} stopOpacity="0.5" />
+                  <stop offset="100%" stopColor={seg.colorB} stopOpacity="0.5" />
+                </linearGradient>
+              ))}
+            </defs>
+            <AnimatePresence mode="wait">
+              {sortedSegments.map((seg, i) => (
+                <motion.line
+                  key={seg.id}
+                  x1={seg.x1} y1={seg.y1}
+                  x2={seg.x2} y2={seg.y2}
+                  stroke={`url(#grad-${seg.id})`}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  initial={{ opacity: 0, pathLength: 0 }}
+                  animate={{ opacity: 1, pathLength: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.05, ease: 'easeInOut' }}
+                />
+              ))}
+            </AnimatePresence>
+          </svg>
+          <div className="absolute bottom-6 left-[8%] right-[8%] pointer-events-none">
+            <div className="w-full h-[1px] bg-zinc-200 relative mb-1" />
+            <div className="flex justify-between w-full relative">
+              {['-1', '0', '+1'].map((l, index) => {
+                const alignmentClass =
+                  index === 0 ? 'items-start text-left' :
+                    index === 2 ? 'items-end text-right' :
+                      'items-center text-center';
+
+                return (
+                  <div
+                    key={l}
+                    className={`flex flex-col absolute ${alignmentClass}`}
+                    style={{
+                      left: index === 0 ? '0%' : index === 1 ? '50%' : 'auto',
+                      right: index === 2 ? '0%' : 'auto',
+                      transform: index === 1 ? 'translateX(-50%)' : 'none'
+                    }}
+                  >
+                    <div className="h-1.5 w-[1px] bg-zinc-400 -mt-[8px] mb-1" />
+                    <span className="text-[10px] font-medium text-zinc-500 tabular-nums">
+                      {l}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <TooltipProvider delayDuration={150}>
+            <AnimatePresence mode="wait">
+              {layout.map(({ mail, rawPriority, priorityVal, left, top }, i) => (
+                <Tooltip key={`${activeTab}-${mail.id}`}>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      type="button"
+                      aria-label={`Mail: ${mail.subject}`}
+                      className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full cursor-pointer z-10"
+                      style={(() => {
+                        const ps = getPriorityStyles(priorityVal);
+                        return {
+                          left: `${left}%`,
+                          top: `${top}%`,
+                          backgroundColor: ps.main,
+                          borderColor: '#FFFFFF99',
+                          borderWidth: 4,
+                          boxShadow: `0 0 0 1px hsl(var(--background)), 0 0 0 3px ${ps.ring}, 0 4px 10px ${ps.shadow}`,
+                        };
+                      })()}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ delay: i * 0.04, type: 'spring', damping: 16, stiffness: 300 }}
+                      whileHover={{ scale: 1.7 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setPreview(mail)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="px-2 relative rounded-t-none">
+                    <div className={`absolute h-0.5 w-full ${getPriorityColor(priorityVal)} -top-1 left-0`} />
+                    <span className="text-[12px] text-black">
+                      {getPriorityMessage(priorityVal)}
+                    </span>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </AnimatePresence>
+          </TooltipProvider>
+
+          {filteredMails.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-xs text-muted-foreground/50">No mails to display</p>
+            </div>
+          )}
+        </div>
       </section>
 
-      {preview ? (
-      <Dialog open onOpenChange={(open) => !open && setPreview(null)}>
-        <DialogContent className="sm:max-w-md" showCloseButton>
-            <>
+      <AnimatePresence>
+        {preview && (
+          <Dialog open onOpenChange={(o) => !o && setPreview(null)}>
+            <DialogContent className="sm:max-w-md w-[95vw] p-5! rounded-lg bg-white">
               <DialogHeader>
-                <DialogTitle className="line-clamp-2 pr-8">{preview.sender.split("<")[0]}</DialogTitle>
-                <DialogDescription className="space-y-2 pt-1 text-left">
-                  <span className="block text-xs">
-                    {new Date(preview.createdAt).toLocaleString()}
-                  </span>
+                <DialogTitle className="text-black line-clamp-1 pr-8">{parseSenderName(preview.sender)}</DialogTitle>
+                <DialogDescription className="text-left text-xs">
+                  {new Date(preview.createdAt).toLocaleString()}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-3 text-sm">
-                <div>
-                  <span className="text-xs font-medium uppercase tracking-wide truncate text-muted-foreground">Priority</span>
-                  <p className="mt-0.5 tabular-nums">
-                    {formatMailPriorityDisplay(preview.priority)}
-                    {previewNormalized != null && (
-                      <span className="text-muted-foreground">
-                        {' '}
-                      </span>
-                    )}
-                  </p>
+              <div className="space-y-4 text-sm">
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-medium text-muted-foreground">Subject</p>
+                  <p className="text-sm text-black line-clamp-2">{preview.subject}</p>
                 </div>
-                <div>
-                  <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Categories</span>
-                  <div className="mt-1.5 flex flex-wrap gap-1">
+
+                <div className="space-y-2">
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    Classifications & Priorities
+                  </p>
+                  <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
                     {(preview.categories?.filter(Boolean).length ?? 0) > 0 ? (
-                      preview.categories!.filter(Boolean).map((c, i) => (
-                        <Badge key={`${c}-${i}`} variant="outline" className="text-xs bg-blue-600 text-white rounded-md! font-normal">
-                          {c}
-                        </Badge>
-                      ))
+                      preview.categories!.filter(Boolean).map((cat, idx) => {
+                        const globalIdx = fetchedCategories.findIndex((c) => c.name === cat);
+                        const styles = globalIdx >= 0 ? getDynamicStyles(globalIdx) : null;
+                        const pri = Array.isArray(preview.priority)
+                          ? preview.priority[idx]
+                          : idx === 0
+                            ? preview.priority ?? undefined
+                            : undefined;
+
+                        return (
+                          <div
+                            key={`${cat}-${idx}`}
+                            className="flex items-center justify-between py-1 border-b border-border/30 last:border-0"
+                          >
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                'text-[11px] font-normal border-0 bg-black/8 text-black rounded-md px-2',
+                              )}>
+                              {cat}
+                            </Badge>
+                            <span className="text-xs tabular-nums font-mono text-black">
+                              {pri ? formatMailPriorityDisplay(pri) : 'N/A'}
+                            </span>
+                          </div>
+                        );
+                      })
                     ) : (
-                      <span className="text-muted-foreground">None</span>
+                      <p className="text-xs text-muted-foreground">No classifications</p>
                     )}
                   </div>
                 </div>
-                <p className="line-clamp-3 text-xs text-muted-foreground">
-                  {formatEmailContent(preview.body).slice(0, 220)}
-                  {(preview.body?.length ?? 0) > 220 ? '...' : ''}
-                </p>
+
+                <div className="pt-2">
+                  <p className="text-[11px] font-medium text-muted-foreground mb-1.5">Preview</p>
+                  <p className="text-xs text-black line-clamp-3 leading-relaxed">
+                    {formatEmailContent(preview.body).slice(0, 220)}
+                    {(preview.body?.length ?? 0) > 220 ? '…' : ''}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-1">
                 <Button
                   variant="accent"
                   type="button"
-                  onClick={() => {
-                    onOpenDetail(preview);
-                    setPreview(null);
-                  }}
+                  onClick={() => { onOpenDetail(preview); setPreview(null); }}
                 >
                   Open Mail
                 </Button>
               </div>
-            </>
-        </DialogContent>
-      </Dialog>
-      ) : null}
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </>
   );
 }

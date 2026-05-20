@@ -55,16 +55,17 @@ export async function POST(req: Request): Promise<NextResponse<AnalyzeCheckRespo
       userId,
       existingInDb.map((m) => m.id),
     );
-    const existingInDbWithStoreFields: Mail[] = existingInDb.map((m) => {
-      const meta = metaByGmailId.get(m.id);
-      return {
-        ...m,
-        categories: meta?.categories ?? null,
-        priority: meta?.priority ?? DEFAULT_MAIL_PRIORITY,
-      };
-    });
+    // const existingInDbWithStoreFields: Mail[] = existingInDb.map((m) => {
+    //   const meta = metaByGmailId.get(m.id);
+    //   return {
+    //     ...m,
+    //     categories: meta?.categories ?? null,
+    //     priority: meta?.priority ?? DEFAULT_MAIL_PRIORITY,
+    //   };
+    // });
 
-    return NextResponse.json({ ok: true, existingInDb: existingInDbWithStoreFields, missingInDb });
+    // return NextResponse.json({ ok: true, existingInDb: existingInDbWithStoreFields, missingInDb });
+    return NextResponse.json({ ok: true, existingInDb: [], missingInDb });
   } catch {
     return NextResponse.json({ ok: false, error: "Sync failed during database check" }, { status: 500 });
   }

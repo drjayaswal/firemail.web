@@ -9,10 +9,10 @@ export interface Mail {
   labels: string[];
   createdAt: string;
   categories?: string[] | null;
-  priority?: string;
+  priority?: string[] | null;
 }
 
-export interface MailQueryOptions {
+export interface CloudQueryOptions {
   unread: boolean;
   days: number;
   count: number;
@@ -20,10 +20,20 @@ export interface MailQueryOptions {
   starred: boolean;
 }
 
-export type FetchOptions = MailQueryOptions;
+export interface DatabaseQueryOptions {
+  count: number;
+  sessionUserId: string
+}
 
-export interface AnalyzeOptions extends MailQueryOptions {
+export type FetchOptions = CloudQueryOptions;
+
+export interface AnalyzeOptions extends CloudQueryOptions {
   store: boolean;
+}
+
+export interface LoadOptions{
+  count: number;
+  sessionUserId: string
 }
 
 export interface AnalyzeCheckRequest {

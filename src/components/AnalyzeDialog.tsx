@@ -33,11 +33,11 @@ export default function AnalyzeDialog({ open, onOpenChange, selectedCount, onAna
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-xl border border-white/20 bg-black sm:max-w-xs">
+      <DialogContent className="rounded-xl border border-black/20 bg-white sm:max-w-xs max-w-xs">
         <form onSubmit={handleSubmit}>
           <DialogHeader className="space-y-3">
-            <DialogTitle className="text-xl tracking-tight text-white">Analyze selected</DialogTitle>
-            <DialogDescription className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            <DialogTitle className="text-xl tracking-tight text-black">Analyze selected</DialogTitle>
+            <DialogDescription className="text-[10px] uppercase tracking-widest text-black/60">
               {selectedCount} mail{selectedCount === 1 ? '' : 's'} · options derived from selection
             </DialogDescription>
           </DialogHeader>
@@ -45,15 +45,15 @@ export default function AnalyzeDialog({ open, onOpenChange, selectedCount, onAna
             <div className="flex items-center space-x-2">
               <Checkbox id="store" checked={store} onCheckedChange={(c) => setStore(c === true)} />
               <div className="flex items-center gap-1.5">
-                <Label htmlFor="store" className="cursor-pointer text-sm font-medium text-gray-300">
+                <Label htmlFor="store" className="cursor-pointer text-sm font-medium text-black">
                   Store Context
                 </Label>
                 <TooltipProvider>
                   <Tooltip delayDuration={300}>
                     <TooltipTrigger asChild>
-                      <Info className="h-3 w-3 cursor-help text-accent" />
+                      <Info className="h-3 w-3 cursor-help text-amber-500" strokeWidth={3} />
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[250px] border-border bg-white text-[10px]">
+                    <TooltipContent side="top" className="max-w-[250px] border-border bg-amber-500 text-[10px]">
                       <p>Persist results encrypted in the Database</p>
                     </TooltipContent>
                   </Tooltip>
@@ -61,7 +61,7 @@ export default function AnalyzeDialog({ open, onOpenChange, selectedCount, onAna
               </div>
             </div>
           </div>
-          <DialogFooter className="border-white/20 bg-black">
+          <DialogFooter className="grid grid-cols-2 gap-2 border-t-black/20 bg-white">
             <Button type="button" variant="no_outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>

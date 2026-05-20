@@ -10,50 +10,48 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CloudDownloadIcon } from 'lucide-react';
-import type { FetchOptions } from '@/types';
-import { buildCloudQueryOptions, CloudQueryFields } from './QueryFields';
+import { DatabaseZapIcon } from 'lucide-react';
+import type { LoadOptions } from '@/types';
+import { buildDatabaseQueryOptions, DatabaseQueryFields } from './QueryFields';
 
-interface FetchDialogProps {
+interface LoadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onFetchFromCloud: (opts: FetchOptions) => void;
+  sessionUserId: string | null | undefined;
+  onLoadFromDatabase: (opts: LoadOptions) => void;
 }
 
-export default function FetchDialog({
+export default function LoadDialog({
   open,
   onOpenChange,
-  onFetchFromCloud,
-}: FetchDialogProps) {
-  const [unread, setUnread] = useState(true);
-  const [days, setDays] = useState(1);
+  sessionUserId,
+  onLoadFromDatabase,
+}: LoadDialogProps) {
   const [count, setCount] = useState(1);
-  const [important, setImportant] = useState(false);
-  const [starred, setStarred] = useState(false);
-  const fields = { unread, setUnread, days, setDays, count, setCount, important, setImportant, starred, setStarred };
+  const fields = { count, setCount, sessionUserId };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl border border-black/20 bg-white sm:max-w-xs max-w-xs p-5">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl tracking-tight text-black">Fetch mails</DialogTitle>
+          <DialogTitle className="text-xl tracking-tight text-black">Load mails</DialogTitle>
           <DialogDescription className="text-[10px] uppercase tracking-widest text-black/60">
-            Query Gmail with filters below
+            Query Encrypted mails from Database
           </DialogDescription>
         </DialogHeader>
-        <CloudQueryFields {...fields} />
+        <DatabaseQueryFields {...fields} />
         <DialogFooter className="grid grid-cols-2 gap-2 border-t-black/20 bg-white">
           <Button
             type="button"
             variant="accent"
             className='w-fit!'
             onClick={() => {
-              onFetchFromCloud(buildCloudQueryOptions(fields));
+              onLoadFromDatabase(buildDatabaseQueryOptions(fields, sessionUserId!));
               onOpenChange(false);
             }}
           >
-            <CloudDownloadIcon />
-            Fetch Mails
+            <DatabaseZapIcon />
+            Load Mails
           </Button>
         </DialogFooter>
       </DialogContent>

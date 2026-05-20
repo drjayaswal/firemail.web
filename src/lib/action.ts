@@ -1,6 +1,10 @@
 import { google, type gmail_v1 } from 'googleapis';
 import { auth } from '@/lib/auth';
-import { AnalyzeOptions, Mail } from '@/types';
+import { AnalyzeOptions, DatabaseQueryOptions, Mail } from '@/types';
+import { db } from '@/app/db';
+import { categories, encryptedMail } from '@/app/db/schema';
+import { eq } from 'drizzle-orm';
+import { decryptJsonPayload } from './mail-crypto';
 
 function parseGmailMessage(msgId: string, details: { data: gmail_v1.Schema$Message }): Mail {
   const payload = details.data.payload;
@@ -70,6 +74,77 @@ export async function getCustomMails(opts: AnalyzeOptions): Promise<Mail[]> {
       mails.push(parseGmailMessage(msg.id!, details));
     }
 
+    return mails;
+  } catch (error: unknown) {
+    const err = error as { code?: number };
+    if (err.code === 401) {
+      throw new Error('Your session expired. Please sign in again.');
+    }
+    throw error;
+  }
+}
+export async function getCategories(): Promise<{ name: string }[]> {
+  const session = await auth();
+  if (!session?.accessToken) {
+    throw new Error('Unauthorized: No access token');
+  }
+
+  try {
+    const res = await db
+      .select({ name: categories.name })
+      .from(categories)
+
+    const names = res || [];
+    return names
+  } catch (error: unknown) {
+    const err = error as { code?: number };
+    if (err.code === 401) {
+      throw new Error('Your session expired. Please sign in again.');
+    }
+    throw error;
+  }
+}
+
+export async function getDatabaseMails(opts: DatabaseQueryOptions): Promise<Mail[]> {
+  const session = await auth();
+  if (!session?.accessToken) {
+    throw new Error('Unauthorized: No access token');
+  }
+
+  try {
+    const res = await db
+      .select()
+      .from(encryptedMail)
+      .where(eq(encryptedMail.userId, session.user.id!))
+      .limit(opts.count);
+
+    const messages = res || [];
+    const mails: Mail[] = [];
+    if (messages.length === 0) {
+      return mails;
+    }
+
+    for (const msg of messages) {
+      try {
+        const decryptedPayload = decryptJsonPayload<Mail>(msg.ciphertext);
+
+        mails.push({
+          id: msg.gmailMessageId,
+          threadId: decryptedPayload.threadId ?? null,
+          subject: decryptedPayload.subject ?? '(No Subject)',
+          sender: decryptedPayload.sender ?? 'Unknown Sender',
+          recipient: decryptedPayload.recipient ?? 'Unknown Recipient',
+          body: decryptedPayload.body ?? '',
+          status: decryptedPayload.status ?? 'unread',
+          labels: decryptedPayload.labels ?? [],
+          createdAt: msg.createdAt.toISOString(),
+          categories: msg.categories,
+          priority: msg.priority,
+        });
+      } catch (decryptionError) {
+        console.error(`Failed to decrypt mail item with message ID: ${msg.gmailMessageId}`, decryptionError);
+      }
+    }
     return mails;
   } catch (error: unknown) {
     const err = error as { code?: number };

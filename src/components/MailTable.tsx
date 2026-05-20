@@ -67,21 +67,23 @@ export default function MailTable({
           <TableRow>
             {selectable ? (
               <TableHead className="w-10">
+                {selectedIds?.size || allSelected ? 
                 <Checkbox checked={allSelected} onCheckedChange={() => onToggleAll?.()} aria-label="Select all" />
+                :null}
               </TableHead>
             ) : null}
-            <TableHead className="text-[10px] uppercase tracking-widest text-muted-foreground">Status</TableHead>
-            <TableHead className="text-[10px] uppercase tracking-widest text-muted-foreground">Origin</TableHead>
-            <TableHead className="text-[10px] uppercase tracking-widest text-muted-foreground">Subject</TableHead>
-            <TableHead className="text-[10px] uppercase tracking-widest text-muted-foreground">Body</TableHead>
-            <TableHead className="text-[10px] uppercase tracking-widest text-muted-foreground">Timestamp</TableHead>
+            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Status</TableHead>
+            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Origin</TableHead>
+            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Subject</TableHead>
+            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Body</TableHead>
+            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Timestamp</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <AnimatePresence mode="popLayout">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <TableRow key={`skeleton-${i}`} className="border-white/5">
+                <TableRow key={`skeleton-${i}`} className="border-black/20 border-b">
                   {selectable ? (
                     <TableCell>
                       <Skeleton className="h-4 w-4 bg-white/5" />
@@ -105,7 +107,7 @@ export default function MailTable({
                 </TableRow>
               ))
             ) : mails.length === 0 ? (
-              <TableRow className="border-transparent hover:bg-transparent">
+              <TableRow className="border-black/20 hover:bg-transparent">
                 <TableCell colSpan={selectable ? 6 : 5} className="h-48 text-center text-xs uppercase tracking-widest text-muted-foreground">
                   No Mails Found
                 </TableCell>
@@ -123,8 +125,8 @@ export default function MailTable({
                     exit={{ opacity: 0, scale: 0.98 }}
                     key={mail.id}
                     className={cn(
-                      'group cursor-pointer rounded-xl border-white/5 transition-colors hover:bg-white/3',
-                      selected && 'bg-white/10 hover:bg-white/10 border-white',
+                      'group cursor-pointer rounded-xl transition-colors text-black hover:bg-black/3',
+                      selected && 'bg-accent/10 hover:bg-accent/10 text-black',
                     )}
                     onPointerDown={() => startHold(mail)}
                     onPointerUp={() => clearHold()}
@@ -147,7 +149,7 @@ export default function MailTable({
                       <TableCell className="py-4" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={selected}
-                          className='data-checked:bg-white data-checked:border-white'
+                          className='data-checked:bg-accent data-checked:border-accent'
                           onCheckedChange={() => onToggleSelect?.(mail.id)}
                           aria-label={`Select ${mail.subject}`}
                         />

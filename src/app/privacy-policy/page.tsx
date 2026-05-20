@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen p-6 flex justify-center">
+    <div className="min-h-screen p-10 flex justify-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

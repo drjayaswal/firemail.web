@@ -9,10 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        light:"border border-gray-200/75 bg-white hover:bg-gray-50/50 hover:-translate-y-px active:translate-y-px hover:shadow-sm text-black rounded-xl",
         classic: "bg-white hover:opacity-85 text-black active:scale-98 active:translate-y-0.5 rounded-xl ring-0 outline-0 border-0",
         classic_accent: "bg-white hover:bg-accent hover:text-black text-black active:scale-98 active:translate-y-0.5 rounded-xl ring-0 outline-0 border-0",
-        accent: "bg-accent text-black hover:opacity-90 active:scale-98 active:translate-y-0.5 rounded-xl ring-0 outline-0 border-0",
-        ghost: "bg-transparent border border-white/15 text-foreground active:scale-98 active:translate-y-0.5 rounded-xl",
+        accent: "bg-accent text-white hover:opacity-90 active:scale-98 active:translate-y-0.5 rounded-xl ring-0 outline-0 border-0",
+        ghost: "bg-transparent border border-white/15 text-black active:scale-98 active:translate-y-0.5 rounded-xl",
         no_outline: "bg-transparent text-foreground active:scale-98 active:translate-y-0.5 rounded-xl ring-0 outline-0 border-0",
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
         outline:
@@ -29,6 +30,7 @@ const buttonVariants = cva(
         xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        xl: "h-11 gap-2 px-3 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
         icon: "size-8",
         "icon-xs":
           "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",

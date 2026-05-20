@@ -31,14 +31,14 @@ export default function Loader({ onComplete, message }: { onComplete?: () => voi
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 bg-black z-100 flex items-center justify-center">
+    <div className="fixed inset-0 z-100 flex items-center justify-center">
       <motion.div
         className="flex flex-col items-center gap-4 w-48"
         animate={isExiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <div className="text-white text-[9px] uppercase tracking-widest ">{message}</div>
-        <div className="h-0.5 w-full relative bg-white/20 rounded-sm overflow-hidden">
+        <div className="text-accent text-[9px] uppercase tracking-widest ">{message}...</div>
+        <div className="h-0.5 w-full relative bg-accent/15 rounded-sm overflow-hidden">
           <motion.div
             className="absolute inset-y-0 left-0 bg-accent rounded-sm z-10"
             style={{ width: `${speedFactor * 100}%` }}

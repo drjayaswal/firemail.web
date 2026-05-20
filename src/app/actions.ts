@@ -1,7 +1,7 @@
 "use server";
 
 import { fetchInternalApi } from "@/lib/internal-api";
-import type { AnalyzeOptions, FetchOptions, Mail } from "@/types";
+import type { AnalyzeOptions, FetchOptions, LoadOptions, Mail } from "@/types";
 import { deriveAnalyzeOptionsFromMails } from "@/lib/derive-analyze-options";
 
 export async function fetchMailsAction(options: FetchOptions): Promise<{
@@ -81,5 +81,42 @@ export async function analyzeMailsAction(
     return { ok: false, error: typeof data.error === "string" ? data.error : "Request failed" };
   } catch {
     return { ok: false, error: "Analyze check failed" };
+  }
+}
+
+export async function getCategoriesAction(): Promise<{ok:boolean,categories?:{name:string}[] ,error?:string}>{
+  try {
+    const res = await fetchInternalApi("/api/category/fetch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = (await res.json()) as { ok?: boolean; categories?: { name: string }[]; error?: string };
+    if (!res.ok || !data.ok) {
+      return { ok: false, error: typeof data.error === "string" ? data.error : "Fetch failed" };
+    }
+    return { ok: true, categories: data.categories ?? [] };
+  } catch {
+    return { ok: false, error: "Fetch failed" };
+  }
+}
+
+export async function loadMailsFromDatabaseAction(options: LoadOptions): Promise<{
+  ok: boolean;
+  mails?: Mail[];
+  error?: string;
+}> {
+  try {
+    const res = await fetchInternalApi("/api/mail/load", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(options),
+    });
+    const data = (await res.json()) as { ok?: boolean; mails?: Mail[]; error?: string };
+    if (!res.ok || !data.ok) {
+      return { ok: false, error: typeof data.error === "string" ? data.error : "Load failed" };
+    }
+    return { ok: true, mails: data.mails ?? [] };
+  } catch {
+    return { ok: false, error: "Load failed" };
   }
 }

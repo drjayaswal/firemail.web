@@ -7,7 +7,7 @@ const Restriction = () => {
       <div className="space-y-4">
         <Image
           src="/text-logo.png"
-          alt="Fathommail"
+          alt="Unmail"
           width={240}
           height={80}
           className="mx-auto h-auto w-auto object-contain"

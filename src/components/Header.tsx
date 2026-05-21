@@ -44,17 +44,18 @@ export default function Header({
           height={100}
           className="h-auto w-60 object-contain sm:max-w-none"
           priority
-        />
-        <Button
-          type="button"
-          variant="light"
-          onClick={() => isAdmin && router.push('/admin')}
-          disabled={!isAdmin}
-          title={isAdmin ? 'Open admin panel' : 'Admin access only'}
-          className="shrink-0"
-        >
-          <ShieldUserIcon />Admin
-        </Button>
+        />{
+          isAdmin &&
+          <Button
+            type="button"
+            variant="light"
+            onClick={() => isAdmin && router.push('/admin')}
+            title={isAdmin ? 'Open admin panel' : 'Admin access only'}
+            className="shrink-0"
+          >
+            <ShieldUserIcon />Admin
+          </Button>
+        }
       </div>
       <div className="flex w-full min-w-0 flex-col items-stretch gap-4 sm:flex-row sm:items-center lg:w-auto">
         <div className="group relative w-full min-w-0 sm:max-w-xs sm:flex-1 lg:w-64 lg:flex-none">

@@ -19,6 +19,7 @@ import { apiRequest } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import Loader from './Loader';
 import LoadDialog from './LoadDialog';
+import AccountDialog from './AccountDialog';
 
 type SystemStatus = 'Active' | 'Standby' | 'Processing' | 'Offline';
 
@@ -32,9 +33,11 @@ export function toggleInSet(prev: Set<string>, id: string): Set<string> {
 export default function Home({
   sessionUserEmail,
   sessionUserId,
+  isAdmin = false,
 }: {
   sessionUserEmail?: string | null;
   sessionUserId?: string | null;
+  isAdmin?: boolean;
 }) {
   const [appLoading, setAppLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<MailInboxTab>('fetched');
@@ -47,6 +50,7 @@ export default function Home({
   const [analyzing, setAnalyzing] = useState(false);
   const [fetchDialogOpen, setFetchDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
   const [analyzeDialogOpen, setAnalyzeDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [detailMail, setDetailMail] = useState<Mail | null>(null);
@@ -77,6 +81,7 @@ export default function Home({
     await new Promise((r) => setTimeout(r, 400));
     signOut();
     setLoading(false);
+    setAccountDialogOpen(false);
     setAnalyzing(false);
     toast.success('Session closed');
   };
@@ -201,7 +206,7 @@ export default function Home({
   };
 
   if (appLoading) {
-    return <Loader message="Indexing" onComplete={() => setAppLoading(false)} />;
+    return <Loader onComplete={() => setAppLoading(false)} />;
   }
 
   return (
@@ -210,19 +215,20 @@ export default function Home({
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="mx-auto min-w-0 max-w-7xl space-y-8 sm:space-y-12"
+        className="mx-auto min-w-0 max-w-7xl space-y-8 sm:space-y-12 text-black"
       >
         <Header
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           analyzing={analyzing}
           loading={loading}
-          onSignOut={handleSignOut}
+          onAccount={() => setAccountDialogOpen(true)}
           onAnalyze={openAnalyzeDialog}
           analyzeDisabled={selectedFetchedIds.size === 0}
           onFetch={() => setFetchDialogOpen(true)}
           onLoadDataFromDatabase={() => setLoadDialogOpen(true)}
           sessionUserEmail={sessionUserEmail}
+          isAdmin={isAdmin}
         />
         <Card className="min-w-0 bg-white border-black/20 m-0! overflow-hidden">
           <CardHeader className="flex min-w-0 flex-col gap-4 border-black/20 sm:flex-row sm:items-center sm:justify-between">
@@ -269,6 +275,11 @@ export default function Home({
         open={fetchDialogOpen}
         onOpenChange={setFetchDialogOpen}
         onFetchFromCloud={handleFetchFromCloud}
+      />
+      <AccountDialog
+        open={accountDialogOpen}
+        onOpenChange={setAccountDialogOpen}
+        onSignOut={handleSignOut}
       />
       <LoadDialog
         sessionUserId={sessionUserId}

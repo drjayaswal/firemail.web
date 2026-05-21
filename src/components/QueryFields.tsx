@@ -48,9 +48,9 @@ function FlagRow({
           <TooltipProvider>
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
-                <Info className="h-3 w-3 cursor-help text-amber-500" strokeWidth={3} />
+                <Info className="h-3 w-3 cursor-help text-blue-600" strokeWidth={3} />
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[280px] border-border bg-amber-500 text-[10px]">
+              <TooltipContent side="top" className="max-w-[280px] border-border bg-blue-600 text-[10px]">
                 <p>{tip}</p>
               </TooltipContent>
             </Tooltip>

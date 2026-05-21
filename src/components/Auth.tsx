@@ -9,12 +9,12 @@ const Auth = () => {
       <div className="w-full max-w-sm bg-white border border-gray-200 rounded-xl shadow-sm p-8 space-y-8 flex flex-col items-center">
         <div className="flex justify-center">
           <Image
-            src="/assets/unmail-open-source.png"
-            alt="Unmail"
-            width={120}
-            height={120}
+            src="/firemail-opensource.svg"
+            alt="firemail"
+            width={100}
+            height={100}
             quality={90}
-            className="h-auto w-auto object-contain"
+            className="h-auto w-60 object-contain"
             priority
           />
         </div>

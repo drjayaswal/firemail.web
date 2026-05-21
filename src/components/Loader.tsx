@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
-export default function Loader({ onComplete, message }: { onComplete?: () => void, message: string }) {
+export default function Loader({ onComplete }: { onComplete?: () => void }) {
   const [speedFactor, setSpeedFactor] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
 
@@ -37,8 +38,16 @@ export default function Loader({ onComplete, message }: { onComplete?: () => voi
         animate={isExiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <div className="text-accent text-[9px] uppercase tracking-widest ">{message}...</div>
-        <div className="h-0.5 w-full relative bg-accent/15 rounded-sm overflow-hidden">
+        <Image
+          src="/firemail-opensource.svg"
+          alt="firemail"
+          width={100}
+          height={100}
+          quality={90}
+          className="h-auto w-60 object-contain"
+          priority
+        />
+        <div className="h-0.5 w-full relative bg-black/10 rounded-sm overflow-hidden">
           <motion.div
             className="absolute inset-y-0 left-0 bg-accent rounded-sm z-10"
             style={{ width: `${speedFactor * 100}%` }}

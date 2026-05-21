@@ -83,7 +83,7 @@ export default function MailTable({
           <AnimatePresence mode="popLayout">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <TableRow key={`skeleton-${i}`} className="border-black/20 border-b">
+                <TableRow key={`skeleton-${i}`} className="">
                   {selectable ? (
                     <TableCell>
                       <Skeleton className="h-4 w-4 bg-white/5" />

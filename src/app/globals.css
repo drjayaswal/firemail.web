@@ -69,13 +69,13 @@
   --secondary-foreground: #ffffff;
   --muted: #1a1a1a;
   --muted-foreground: #a1a1aa;
-  --accent: #5423a3;
+  --accent: #ff3131;
   --accent-foreground: #FFFFFF;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #262626;
   --input: #262626;
-  --ring: #5423a3;
+  --ring: #ff3131;
   --chart-1: #ffffff;
   --chart-2: #e4e4e7;
   --chart-3: #a1a1aa;
@@ -89,7 +89,7 @@
   --sidebar-accent: #1a1a1a;
   --sidebar-accent-foreground: #f4f4f5;
   --sidebar-border: #262626;
-  --sidebar-ring: #5423a3;
+  --sidebar-ring: #ff3131;
 }
 
 .no-scrollbar::-webkit-scrollbar {

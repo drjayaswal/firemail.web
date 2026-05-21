@@ -35,9 +35,9 @@ export default function AnalyzeDialog({ open, onOpenChange, selectedCount, onAna
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-xl border border-black/20 bg-white sm:max-w-xs max-w-xs">
         <form onSubmit={handleSubmit}>
-          <DialogHeader className="space-y-3">
+          <DialogHeader>
             <DialogTitle className="text-xl tracking-tight text-black">Analyze selected</DialogTitle>
-            <DialogDescription className="text-[10px] uppercase tracking-widest text-black/60">
+            <DialogDescription className="text-[10px] text-black/60">
               {selectedCount} mail{selectedCount === 1 ? '' : 's'} · options derived from selection
             </DialogDescription>
           </DialogHeader>
@@ -51,9 +51,9 @@ export default function AnalyzeDialog({ open, onOpenChange, selectedCount, onAna
                 <TooltipProvider>
                   <Tooltip delayDuration={300}>
                     <TooltipTrigger asChild>
-                      <Info className="h-3 w-3 cursor-help text-amber-500" strokeWidth={3} />
+                      <Info className="h-3 w-3 cursor-help text-blue-600" strokeWidth={3} />
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[250px] border-border bg-amber-500 text-[10px]">
+                    <TooltipContent side="top" className="max-w-[250px] border-border bg-blue-600 text-[10px]">
                       <p>Persist results encrypted in the Database</p>
                     </TooltipContent>
                   </Tooltip>

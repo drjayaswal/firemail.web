@@ -5,34 +5,46 @@ import "./globals.css";
 import { Toaster } from "@/components/Toaster";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://unmail.io"),
+  metadataBase: new URL("https://firemail.in"),
   title: {
-    default: "unmail",
-    template: "%s | unmail",
+    default: "Firemail",
+    template: "%s | Firemail",
   },
-  description: "Secure, AI-powered Gmail analysis and local vault encryption. Trim the noise and keep your voice.",
-  applicationName: "unmail",
-  authors: [{ name: "Unmail Team" }],
-  keywords: ["email analysis", "privacy", "gmail", "encryption", "ai mail"],
+  description: "Secure, Transparent, Reliable. Fire up your inbox.",
+  applicationName: "firemail",
+  authors: [{ name: "Firemail Team and Dhruv Ratan Jayaswal" }],
+  keywords: ["email analysis", "privacy", "gmail", "encryption", "ai mail", "firemail", "fire mail"],
   icons: {
-    icon: [
-      { url: "/icons/favicon-light.png", media: "(prefers-color-scheme: light)" },
-      { url: "/icons/favicon-dark.png", media: "(prefers-color-scheme: dark)" },
-    ],
-    shortcut: "/icons/favicon-light.png",
+    icon: "/icons/favicon.ico",
+    shortcut: "/icons/favicon-32x32.png",
     apple: "/icons/apple-touch-icon.png",
+    other: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        url: "/icons/favicon-32x32.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        url: "/icons/favicon-16x16.png",
+      },
+    ],
   },
+
   openGraph: {
-    title: "unmail",
-    description: "Trimming the noise, keeping the voice.",
-    url: "https://unmail.io",
-    siteName: "unmail",
+    title: "firemail",
+    description: "Fire up your inbox.",
+    url: "https://firemail.in",
+    siteName: "firemail",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "unmail",
-    description: "Trimming the noise, keeping the voice.",
+    title: "firemail",
+    description: "Fire up your inbox.",
   },
 };
 

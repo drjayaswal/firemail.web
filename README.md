@@ -1,4 +1,4 @@
-# Unmail Web
+# Firemail Web
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev/)
@@ -37,8 +37,8 @@ A Next.js dashboard for Gmail: read-only OAuth, encrypted local vault (IndexedDB
 ### Install
 
 ```bash
-git clone https://github.com/YOUR_ORG/unmail.web.git
-cd unmail.web
+git clone https://github.com/YOUR_ORG/firemail.web.git
+cd firemail.web
 cp .env.example .env.local
 ```
 
@@ -193,4 +193,4 @@ Run `bun run lint` and `bun run build` before submitting.
 
 ## License
 
-[MIT](LICENSE) © Unmail contributors
+[MIT](LICENSE) © Firemail contributors

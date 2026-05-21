@@ -61,7 +61,7 @@ export default function HelpCenter() {
       >
         <div className="mb-12">
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 mb-3">Documentation & Help</h1>
-          <p className="text-zinc-500 text-sm">Learn how to securely fetch, analyze, and manage your intelligence with Unmail.</p>
+          <p className="text-zinc-500 text-sm">Learn how to securely fetch, analyze, and manage your intelligence with Firemail.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

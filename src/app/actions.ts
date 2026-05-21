@@ -25,6 +25,30 @@ export async function fetchMailsAction(options: FetchOptions): Promise<{
   }
 }
 
+export async function fetchUserDetails(): Promise<{
+  ok: boolean;
+  data?: any;
+  error?: string;
+}> {
+  try {
+    const res = await fetchInternalApi("/api/user", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    
+    const result = await res.json();
+    
+    if (!res.ok || result.ok === false) {
+      return { ok: false, error: result.error || "Fetch failed" };
+    }
+
+    return { ok: true, data: result.data };
+  } catch {
+    return { ok: false, error: "Fetch failed" };
+  }
+}
+
+
 export async function syncEncryptedMailsToDb(mails: Mail[]): Promise<{
   ok: boolean;
   count?: number;

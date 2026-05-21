@@ -21,7 +21,28 @@ function hashSpreadY(id: string): number {
   for (let i = 0; i < id.length; i++) h = Math.imul(31, h) + id.charCodeAt(i);
   return ((h >>> 0) % 10_000 / 9_999) * 2 - 1;
 }
+function PriorityLegend() {
+  const legendItems = [
+    { label: "Archive", color: "bg-emerald-600" },
+    { label: "Routine", color: "bg-teal-400" },
+    { label: "Normal", color: "bg-yellow-400" },
+    { label: "Important", color: "bg-orange-500" },
+    { label: "Urgent", color: "bg-red-600" },
+  ];
 
+  return (
+    <div className="flex flex-wrap gap-3">
+      {legendItems.map((item) => (
+        <div key={item.label} className="flex items-center gap-1.5">
+          <div className={`size-2.5 rounded-full ${item.color}`} />
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-black/50">
+            {item.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 function getPriorityForCategory(mail: Mail, catName: string): string | null {
   const cats = mail.categories;
   const pris = mail.priority;
@@ -187,7 +208,7 @@ export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Prop
           <p className="text-sm font-medium text-black">Priority Analysis</p>
           <p className="text-xs text-black/40">{filteredMails.length} mail{filteredMails.length !== 1 ? 's' : ''}</p>
         </div>
-
+        <PriorityLegend />
         {validCategories.length > 0 && (
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x w-full">
             {validCategories.map((cat, idx) => {
@@ -242,7 +263,7 @@ export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Prop
                 </linearGradient>
               ))}
             </defs>
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               {sortedSegments.map((seg, i) => (
                 <motion.line
                   key={seg.id}
@@ -289,7 +310,7 @@ export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Prop
           </div>
 
           <TooltipProvider delayDuration={150}>
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               {layout.map(({ mail, rawPriority, priorityVal, left, top }, i) => (
                 <Tooltip key={`${activeTab}-${mail.id}`}>
                   <TooltipTrigger asChild>
@@ -317,8 +338,8 @@ export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Prop
                       onClick={() => setPreview(mail)}
                     />
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="px-2 relative rounded-t-none">
-                    <div className={`absolute h-0.5 w-full ${getPriorityColor(priorityVal)} -top-1 left-0`} />
+                  <TooltipContent side="top" className="px-2 bg-transparent relative rounded-t-none">
+                    <div className={`absolute h-0.5 w-full ${getPriorityColor(priorityVal)} top-0 left-0`} />
                     <span className="text-[12px] text-black">
                       {getPriorityMessage(priorityVal)}
                     </span>
@@ -361,7 +382,6 @@ export default function AnalyzedMailsPriorityGraph({ mails, onOpenDetail }: Prop
                     {(preview.categories?.filter(Boolean).length ?? 0) > 0 ? (
                       preview.categories!.filter(Boolean).map((cat, idx) => {
                         const globalIdx = fetchedCategories.findIndex((c) => c.name === cat);
-                        const styles = globalIdx >= 0 ? getDynamicStyles(globalIdx) : null;
                         const pri = Array.isArray(preview.priority)
                           ? preview.priority[idx]
                           : idx === 0

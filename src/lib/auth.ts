@@ -96,7 +96,10 @@ export const auth = createBetterAuth({
     deviceAuthorization({ 
       verificationUri: "/device", 
       userCodeLength: 8,
-      schema: {}
+      schema: {},
+      validateClient: async (clientId) => {
+        return clientId === "firemail-cli";
+      },
     }),
   ],
 });

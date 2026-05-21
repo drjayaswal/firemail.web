@@ -7,6 +7,6 @@ import Auth from "@/components/Auth";
 export default async function AdminPage() {
   const session = await getSession();
   if (!session) return <Auth />
-  if (!isAdminEmail(session.user?.email)) return <Restriction />
+  if (isAdminEmail(session.user?.email)) return <Restriction />
   return <Admin />;
 }

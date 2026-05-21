@@ -93,7 +93,7 @@ export default function AppNavbar({
                   {
                     item.href === '/' &&
                     <Image
-                      src="/logo-nobg.svg"
+                      src={active ? "/logo-nobg.svg" : "/logo.svg"}
                       alt="Firemail"
                       width={80}
                       height={28}

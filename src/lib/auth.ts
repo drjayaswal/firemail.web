@@ -8,13 +8,19 @@ import {
   authUser,
   authSession,
   authAccount,
-  authVerification,
+  authVerification
 } from "@/app/db/auth-schema";
 import {
   syncAppUserFromAuthAccount,
   resolveGoogleAccessToken,
   type AppSession,
 } from "@/lib/auth-server";
+import {
+  // deviceAuthorization as deviceAuthorizationSchema,
+  deviceCode,
+} from "@/app/db/schema";
+
+import { deviceAuthorization } from "better-auth/plugins";
 
 function authBaseUrl(): string {
   const url = process.env.BETTER_AUTH_URL ?? process.env.NEXTAUTH_URL;
@@ -43,6 +49,7 @@ export const auth = createBetterAuth({
       auth_session: authSession,
       auth_account: authAccount,
       auth_verification: authVerification,
+      deviceCode: deviceCode,
     },
   }),
   user: {
@@ -84,7 +91,14 @@ export const auth = createBetterAuth({
       },
     },
   },
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    deviceAuthorization({ 
+      verificationUri: "/device", 
+      userCodeLength: 8,
+      schema: {}
+    }),
+  ],
 });
 
 export type { AppSession };

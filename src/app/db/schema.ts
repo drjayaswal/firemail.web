@@ -6,6 +6,7 @@ import {
   index,
   uniqueIndex,
   decimal,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -18,6 +19,18 @@ export const user = pgTable("user", {
   createdAt: timestamp("createdAt").notNull(),
 });
 
+export const deviceCode = pgTable("device_code", {
+  id: text("id").primaryKey(),
+  deviceCode: text("device_code").notNull().unique(),
+  userCode: text("user_code").notNull().unique(),
+  userId: text("user_id"),
+  clientId: text("client_id"),
+  scope: text("scope"),
+  status: text("status").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  lastPolledAt: timestamp("last_polled_at"),
+  pollingInterval: integer("polling_interval"),
+});
 export const encryptedMail = pgTable("encrypted_mail", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),

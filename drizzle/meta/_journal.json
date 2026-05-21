@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1778758643037,
-      "tag": "0000_white_randall",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1778758669059,
-      "tag": "0001_rare_puppet_master",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1778760000000,
-      "tag": "0002_better_auth",
+      "when": 1779393892294,
+      "tag": "0000_cooing_king_cobra",
       "breakpoints": true
     }
   ]

@@ -58,16 +58,16 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `AUTH_SECRET` | Yes | NextAuth signing secret ([generate](https://generate-secret.vercel.app/32)) |
+| `BETTER_AUTH_SECRET` or `AUTH_SECRET` | Yes | Better Auth signing secret |
+| `BETTER_AUTH_URL` or `NEXTAUTH_URL` | Yes (prod) | App URL, e.g. `http://localhost:3000` |
 | `AUTH_GOOGLE_ID` | Yes | Google OAuth client ID |
 | `AUTH_GOOGLE_SECRET` | Yes | Google OAuth client secret |
 | `DATABASE_URL` | Yes | Postgres connection string |
-| `MAIL_ENCRYPTION_KEY` | Recommended | Dedicated key for vault ciphertext (32+ chars) |
-| `NEXTAUTH_URL` | Yes (prod) | App URL, e.g. `http://localhost:3000` |
 | `AI_SERVER_URL` | For analyze | Base URL of the analysis API |
 | `ADMIN_EMAIL` | Optional | Email allowed to access `/admin` |
+| `BETTER_AUTH_API_KEY` | Optional | Reserved for Better Auth integrations |
 
-Google OAuth redirect URI: `{NEXTAUTH_URL}/api/auth/callback/google`  
+Google OAuth redirect URI: `{BETTER_AUTH_URL}/api/auth/callback/google`  
 Scope used: `openid email profile https://www.googleapis.com/auth/gmail.readonly`
 
 ---
@@ -96,7 +96,7 @@ Browser (Home)
   │            → AI_SERVER_URL/analyze/mails
   └─ Sync   → POST /api/mail/sync → encrypted_mail (Postgres)
 
-Auth → /api/auth/[...nextauth] (NextAuth + Google)
+Auth → /api/auth/[...all] (Better Auth + Google)
 ```
 
 ### API routes
@@ -106,7 +106,7 @@ Auth → /api/auth/[...nextauth] (NextAuth + Google)
 | `/api/mail/fetch` | POST | Fetch mail from Gmail with query options |
 | `/api/mail/analyze-check` | POST | Partition selected mail vs DB; attach categories/priority |
 | `/api/mail/sync` | POST | Upsert selected mail ciphertext into `encrypted_mail` |
-| `/api/auth/[...nextauth]` | * | Session and OAuth |
+| `/api/auth/[...all]` | * | Session and OAuth |
 
 ### Database schema
 

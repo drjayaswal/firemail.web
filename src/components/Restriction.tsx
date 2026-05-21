@@ -11,6 +11,7 @@ const Restriction = () => {
             width={240}
             height={80}
             className="mx-auto h-auto w-auto object-contain"
+            style={{ height: 'auto', width: 'auto' }}
             priority
           />
         </div>

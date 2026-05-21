@@ -1,10 +1,15 @@
 'use client';
 
-import Image from 'next/image';
-import { Search, DeleteIcon, RefreshCw, User, Wand2Icon, DatabaseBackupIcon, PowerIcon, CloudDownloadIcon, ShieldUserIcon } from 'lucide-react';
+import {
+  Search,
+  DeleteIcon,
+  RefreshCw,
+  User,
+  DatabaseBackupIcon,
+  CloudDownloadIcon,
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   searchTerm: string;
@@ -17,7 +22,6 @@ interface HeaderProps {
   onFetch: () => void;
   onAccount: () => void;
   sessionUserEmail?: string | null;
-  isAdmin?: boolean;
 }
 
 export default function Header({
@@ -31,76 +35,93 @@ export default function Header({
   onAccount,
   onFetch,
   sessionUserEmail,
-  isAdmin = false,
 }: HeaderProps) {
-  const router = useRouter();
   return (
-    <div className="flex min-w-0 max-w-full flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between sm:p-0 p-5 pb-0 lg:gap-6">
-      <div className="shrink-0 flex items-center gap-2">
-        <Image
-          src="/firemail-opensource.svg"
-          alt="Logo"
-          width={100}
-          height={100}
-          className="h-auto w-60 object-contain sm:max-w-none"
-          priority
-        />{
-          isAdmin &&
-          <Button
+    <header className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+      <div className="relative w-full sm:max-w-[240px] lg:max-w-[300px]">
+        <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors focus-within:text-foreground" />
+        <Input
+          placeholder="Search Firebox..."
+          className="w-full pl-8 pr-8 sm:h-8 text-sm"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {searchTerm && (
+          <button
             type="button"
-            variant="light"
-            onClick={() => isAdmin && router.push('/admin')}
-            title={isAdmin ? 'Open admin panel' : 'Admin access only'}
-            className="shrink-0"
+            onClick={() => setSearchTerm('')}
+            className="absolute right-1 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-6 sm:w-6"
+            aria-label="Clear search"
           >
-            <ShieldUserIcon />Admin
-          </Button>
-        }
+            <DeleteIcon className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+          </button>
+        )}
       </div>
-      <div className="flex w-full min-w-0 flex-col items-stretch gap-4 sm:flex-row sm:items-center lg:w-auto">
-        <div className="group relative w-full min-w-0 sm:max-w-xs sm:flex-1 lg:w-64 lg:flex-none">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-accent" />
-          <Input
-            placeholder="Search inbox..."
-            className="pl-9 pr-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+
+      <div className="flex items-center gap-2 sm:w-auto">
+        <Button
+          type="button"
+          variant="accent"
+          size="sm"
+          onClick={onAnalyze}
+          disabled={analyzing || analyzeDisabled}
+          className="flex-1 gap-2 sm:flex-none"
+          title="Analyze"
+        >
+          <span>Analyze</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant="light"
+          size="sm"
+          onClick={onFetch}
+          disabled={loading}
+          title="Fetch from Gmail"
+        >
+          {loading ? (
+            <RefreshCw className="h-4 w-4 shrink-0 animate-spin" />
+          ) : (
+            <CloudDownloadIcon className="h-4 w-4 shrink-0" />
+          )}
+          <span className="hidden sm:inline-block">
+            {loading ? '...' : 'Fetch'}
+          </span>
+        </Button>
+
+        <Button
+          type="button"
+          variant="light"
+          size="sm"
+          onClick={onLoadDataFromDatabase}
+          disabled={loading}
+          title="Load from database"
+        >
+          <DatabaseBackupIcon
+            className={`h-4 w-4 shrink-0 ${loading ? 'animate-pulse' : ''}`}
           />
-          {searchTerm ? (
-            <button
+          <span className="hidden sm:inline-block">
+            {loading ? '...' : 'Load'}
+          </span>
+        </Button>
+
+        {sessionUserEmail && (
+          <div className="ml-auto flex shrink-0 sm:ml-0">
+            <Button
               type="button"
-              onClick={() => setSearchTerm('')}
-              className="absolute sm:-right-2 -right-1 top-1/2 flex h-11 min-h-11 hover:-translate-x-0.5 duration-300 min-w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-black transition-colors hover:text-red-600"
-              aria-label="Clear search"
+              variant="light"
+              size="sm"
+              onClick={onAccount}
+              title={sessionUserEmail}
             >
-              <DeleteIcon className="h-4 w-4" />
-            </button>
-          ) : null}
-        </div>
-        <div className="w-full min-w-0 grid sm:grid-cols-4 grid-cols-2 gap-2 sm:w-auto sm:justify-end">
-          <Button type="button" variant="accent" onClick={onAnalyze} disabled={analyzing || analyzeDisabled} className="shrink-0">
-            <Wand2Icon />Analyze
-          </Button>
-          <Button type="button" variant="light" onClick={onFetch} disabled={loading} className="shrink-0">
-            {loading ? <RefreshCw className="animate-spin" /> : <CloudDownloadIcon className="h-4 w-4" />}
-            {loading ? 'Fetching' : 'Fetch'}
-          </Button>
-          <Button type="button" variant="light" onClick={onLoadDataFromDatabase} disabled={loading} className="shrink-0">
-            {loading ? <DatabaseBackupIcon className="animate-pulse" /> : <DatabaseBackupIcon className="h-4 w-4" />}
-            {loading ? 'Loading' : 'Load'}
-          </Button>
-          {sessionUserEmail ? (
-            <>
-              <Button
-                type="button" variant="ghost" className="shrink-0"
-                onClick={onAccount}>
-                <User className="fill-muted-foreground text-muted-foreground" />
-                {sessionUserEmail.slice(0, 6) + "..."}
-              </Button>
-            </>
-          ) : null}
-        </div>
+              <User className="h-4 w-4 shrink-0 text-black" />
+              <span className="hidden max-w-[140px] truncate sm:inline-block">
+                {sessionUserEmail}
+              </span>
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+    </header>
   );
 }

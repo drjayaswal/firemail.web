@@ -1,5 +1,5 @@
 import { google, type gmail_v1 } from 'googleapis';
-import { auth } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { AnalyzeOptions, DatabaseQueryOptions, Mail } from '@/types';
 import { db } from '@/app/db';
 import { categories, encryptedMail } from '@/app/db/schema';
@@ -33,7 +33,7 @@ function parseGmailMessage(msgId: string, details: { data: gmail_v1.Schema$Messa
 }
 
 export async function getCustomMails(opts: AnalyzeOptions): Promise<Mail[]> {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.accessToken) {
     throw new Error('Unauthorized: No access token');
   }
@@ -84,7 +84,7 @@ export async function getCustomMails(opts: AnalyzeOptions): Promise<Mail[]> {
   }
 }
 export async function getCategories(): Promise<{ name: string }[]> {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.accessToken) {
     throw new Error('Unauthorized: No access token');
   }
@@ -106,7 +106,7 @@ export async function getCategories(): Promise<{ name: string }[]> {
 }
 
 export async function getDatabaseMails(opts: DatabaseQueryOptions): Promise<Mail[]> {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.accessToken) {
     throw new Error('Unauthorized: No access token');
   }

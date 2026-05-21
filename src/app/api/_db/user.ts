@@ -1,4 +1,4 @@
-import type { Session } from "next-auth";
+import type { AppSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
 import { db } from "@/app/db";
 import { encryptedMail, user } from "@/app/db/schema";
@@ -95,7 +95,7 @@ export async function upsertOAuthUserFromCredentials(opts: {
   await upsertOAuthUserRow({ userId, email, accessToken, createdAt: new Date() });
 }
 
-export async function ensureUserRowFromSession(session: Session | null): Promise<boolean> {
+export async function ensureUserRowFromSession(session: AppSession | null): Promise<boolean> {
   const userId = session?.user?.id;
   const email = session?.user?.email;
   if (!userId || !email) return false;

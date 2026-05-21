@@ -3,7 +3,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { UserIcon, MailIcon, CalendarIcon, ChevronsRightIcon } from 'lucide-react';
+import Link from 'next/link';
+import { UserIcon, MailIcon, CalendarIcon, ChevronsRightIcon, CircleUserIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { fetchUserDetails } from '@/app/actions';
 
 interface AccountDialogProps {
@@ -63,7 +65,19 @@ export default function AccountDialog({ open, onOpenChange, onSignOut }: Account
                         <div className="h-2 animate-pulse bg-zinc-100 rounded-lg" />
                     )}
                 </DialogHeader>
-                <DialogFooter className="mt-4 pt-4 bg-white border-t border-black/10">
+                <Button
+                    type="button"
+                    variant="light"
+                    size="sm"
+                    className="h-9 w-full text-xs"
+                    asChild
+                >
+                    <Link href="/profile" onClick={() => onOpenChange(false)}>
+                        <CircleUserIcon className="h-3.5 w-3.5" />
+                        View profile
+                    </Link>
+                </Button>
+                <DialogFooter className="bg-white border-t border-black/10">
                     <div
                         ref={containerRef}
                         className="relative w-full h-12 rounded-full overflow-hidden border border-black/5 shadow-inner bg-gray-100 flex items-center p-1">

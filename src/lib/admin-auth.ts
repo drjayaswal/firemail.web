@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 
 export function isAdminEmail(email: string | null | undefined): boolean {
   const adminEmail = process.env.ADMIN_EMAIL;
@@ -6,7 +6,7 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 }
 
 export async function requireAdminSession() {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.accessToken) {
     return { ok: false as const, status: 401, error: 'Unauthorized' };
   }

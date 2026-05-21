@@ -45,6 +45,7 @@ export default function Loader({ onComplete }: { onComplete?: () => void }) {
           height={100}
           quality={90}
           className="h-auto w-60 object-contain"
+          style={{ height: 'auto' }}
           priority
         />
         <div className="h-0.5 w-full relative bg-black/10 rounded-sm overflow-hidden">

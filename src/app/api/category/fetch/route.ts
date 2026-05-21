@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { getCategories } from '@/lib/action';
 
 export type CategoryFetchResponse = { ok: true; categories: { name: string }[] } | { ok: false; error: string };
 
 export async function POST(): Promise<NextResponse<CategoryFetchResponse>> {
-  const session = await auth();
+  const session = await getSession();
   if (!session?.accessToken) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }

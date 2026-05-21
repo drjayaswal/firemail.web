@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { ensureUserRowFromSession } from "@/app/api/_db/user";
 import {
   getCategoriesAndPriorityByGmailIds,
@@ -13,7 +13,7 @@ export type AnalyzeCheckResponse =
   | { ok: false; error: string };
 
 export async function POST(req: Request): Promise<NextResponse<AnalyzeCheckResponse>> {
-  const session = await auth();
+  const session = await getSession();
   const userId = session?.user?.id;
   if (!userId) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });

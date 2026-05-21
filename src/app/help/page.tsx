@@ -41,7 +41,7 @@ export default function HelpCenter() {
       )
     },
     {
-      title: 'Inbox Navigation',
+      title: 'Firebox Navigation',
       description: 'Switch effortlessly between your Fetched and Analyzed inboxes using the primary tab system. Both views support comprehensive real-time search, multi-selection, and a detailed slide-out sheet for reading specific threads.',
       icon: (
         <svg className="w-5 h-5 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">

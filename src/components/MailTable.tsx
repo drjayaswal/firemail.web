@@ -72,11 +72,11 @@ export default function MailTable({
                 :null}
               </TableHead>
             ) : null}
-            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Status</TableHead>
-            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Origin</TableHead>
-            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Subject</TableHead>
-            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Body</TableHead>
-            <TableHead className="text-[12px] uppercase tracking-widest text-muted-foreground">Timestamp</TableHead>
+            <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-[12px] sm:tracking-widest">Status</TableHead>
+            <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-[12px] sm:tracking-widest">Origin</TableHead>
+            <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-[12px] sm:tracking-widest">Subject</TableHead>
+            <TableHead className="hidden text-[10px] uppercase tracking-wider text-muted-foreground md:table-cell sm:text-[12px] sm:tracking-widest">Body</TableHead>
+            <TableHead className="hidden text-[10px] uppercase tracking-wider text-muted-foreground sm:table-cell sm:text-[12px] sm:tracking-widest">Time</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -108,7 +108,7 @@ export default function MailTable({
               ))
             ) : mails.length === 0 ? (
               <TableRow className="border-black/20 hover:bg-transparent">
-                <TableCell colSpan={selectable ? 6 : 5} className="h-48 text-center text-xs uppercase tracking-widest text-muted-foreground">
+                <TableCell colSpan={selectable ? 6 : 5} className="h-32 text-center text-[10px] uppercase tracking-wider text-muted-foreground sm:h-48 sm:text-xs sm:tracking-widest">
                   No Mails Found
                 </TableCell>
               </TableRow>
@@ -146,7 +146,7 @@ export default function MailTable({
                     }}
                   >
                     {selectable ? (
-                      <TableCell className="py-4" onClick={(e) => e.stopPropagation()}>
+                      <TableCell className="py-2 sm:py-4" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={selected}
                           className='data-checked:bg-accent data-checked:border-accent'
@@ -155,22 +155,22 @@ export default function MailTable({
                         />
                       </TableCell>
                     ) : null}
-                    <TableCell className="py-4">
-                      <Badge variant={mail.status === 'unread' ? 'failure_light' : 'success_light'} className="px-2 py-0 text-[10px] capitalize">
+                    <TableCell className="py-2 sm:py-4">
+                      <Badge variant={mail.status === 'unread' ? 'failure_light' : 'success_light'} className="px-1.5 py-0 text-[9px] capitalize sm:px-2 sm:text-[10px]">
                         {mail.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="max-w-[40vw] py-4 text-sm tracking-tight sm:max-w-none">
+                    <TableCell className="max-w-[28vw] py-2 text-xs tracking-tight sm:max-w-none sm:py-4 sm:text-sm">
                       <span className="block truncate sm:max-w-[280px]">{mail.sender.split('<')[0]}</span>
                     </TableCell>
-                    <TableCell className="max-w-[40vw] py-4 text-sm tracking-tight sm:max-w-none">
+                    <TableCell className="max-w-[36vw] py-2 text-xs tracking-tight sm:max-w-none sm:py-4 sm:text-sm">
                       <span className="block truncate sm:max-w-[280px]">{mail.subject}</span>
                     </TableCell>
-                    <TableCell className="max-w-[40vw] py-4 text-sm tracking-tight sm:max-w-none">
+                    <TableCell className="hidden max-w-[40vw] py-2 text-xs tracking-tight md:table-cell sm:py-4 sm:text-sm sm:max-w-none">
                       <span className="block truncate sm:max-w-[280px]">{formatEmailContent(mail.body)}</span>
                     </TableCell>
-                    <TableCell className="py-4 text-right text-xs text-muted-foreground">
-                      {new Date(mail.createdAt).toLocaleDateString()}
+                    <TableCell className="hidden py-2 text-right text-[10px] text-muted-foreground sm:table-cell sm:py-4 sm:text-xs">
+                      {new Date(mail.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </TableCell>
                   </motion.tr>
                 );

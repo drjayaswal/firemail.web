@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { encryptJsonPayload } from '@/lib/mail-crypto';
 import { ensureUserRowFromSession } from '@/app/api/_db/user';
 import { upsertEncryptedMailsForUser } from '@/app/api/_db/encrypted-mail';
@@ -8,7 +8,7 @@ import type { Mail } from '@/types';
 export type MailSyncResponse = { ok: true; count: number } | { ok: false; error: string };
 
 export async function POST(req: Request): Promise<NextResponse<MailSyncResponse>> {
-  const session = await auth();
+  const session = await getSession();
   const userId = session?.user?.id;
   if (!userId) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });

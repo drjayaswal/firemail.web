@@ -1,23 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Loader2Icon } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { Button } from './ui/button';
 import { toast } from '@/lib/toast';
+import { useSearchParams } from 'next/navigation';
 
 export default function Auth() {
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-
+  const [redirectTo, setRedirectTo] = useState("/");
+  
+  useEffect(() => {
+    // 1. Grab the full encoded redirect path (e.g., "/device?user_code=ABCD1234")
+    const redirectParam = searchParams.get("redirect");
+    if (redirectParam) {
+      setRedirectTo(redirectParam);
+    }
+  }, [searchParams]);
+  
   const handleGoogleSignIn = async () => {
     if (loading) return;
     setLoading(true);
     try {
       const { data, error } = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: '/',
+        // 2. Pass the exact path back to the callbackURL
+        callbackURL: redirectTo, 
       });
 
       if (error) {

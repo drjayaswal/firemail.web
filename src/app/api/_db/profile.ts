@@ -1,7 +1,17 @@
 import { eq, and, count } from "drizzle-orm";
 import { db } from "@/app/db";
 import { user, encryptedMail } from "@/app/db/schema";
-import { authUser, authAccount } from "@/app/db/auth-schema";
+import { authUser, authAccount, authSession } from "@/app/db/auth-schema";
+
+export type Session = {
+  id: string;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  userId: string;
+};
 
 export type UserProfile = {
   id: string;
@@ -16,58 +26,43 @@ export type UserProfile = {
   providerAccountId: string | null;
   scopes: string | null;
   providerLinkedAt: string | null;
+  sessions: Session[];
 };
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
-  const [authRow] = await db
-    .select({
-      id: authUser.id,
-      name: authUser.name,
-      email: authUser.email,
-      image: authUser.image,
-      emailVerified: authUser.emailVerified,
-      authCreatedAt: authUser.createdAt,
-    })
-    .from(authUser)
-    .where(eq(authUser.id, userId))
-    .limit(1);
+  const [authRow, appRow, googleAccount, sessions] = await Promise.all([
+    db.select().from(authUser).where(eq(authUser.id, userId)).limit(1),
+    db
+      .select({ createdAt: user.createdAt, totalEncryptedMails: count(encryptedMail.id) })
+      .from(user)
+      .leftJoin(encryptedMail, eq(user.id, encryptedMail.userId))
+      .where(eq(user.id, userId))
+      .groupBy(user.id, user.createdAt)
+      .limit(1),
+    db.select().from(authAccount).where(and(eq(authAccount.userId, userId), eq(authAccount.providerId, 'google'))).limit(1),
+    db.select().from(authSession).where(eq(authSession.userId, userId))
+  ]);
 
-  if (!authRow) return null;
-
-  const [appRow] = await db
-    .select({
-      createdAt: user.createdAt,
-      totalEncryptedMails: count(encryptedMail.id),
-    })
-    .from(user)
-    .leftJoin(encryptedMail, eq(user.id, encryptedMail.userId))
-    .where(eq(user.id, userId))
-    .groupBy(user.id, user.createdAt)
-    .limit(1);
-
-  const [googleAccount] = await db
-    .select({
-      providerId: authAccount.providerId,
-      accountId: authAccount.accountId,
-      scope: authAccount.scope,
-      createdAt: authAccount.createdAt,
-    })
-    .from(authAccount)
-    .where(and(eq(authAccount.userId, userId), eq(authAccount.providerId, "google")))
-    .limit(1);
+  if (!authRow[0]) return null;
 
   return {
-    id: authRow.id,
-    name: authRow.name,
-    email: authRow.email,
-    image: authRow.image,
-    emailVerified: authRow.emailVerified,
-    authCreatedAt: authRow.authCreatedAt.toISOString(),
-    appCreatedAt: appRow?.createdAt?.toISOString() ?? null,
-    totalEncryptedMails: Number(appRow?.totalEncryptedMails ?? 0),
-    provider: googleAccount?.providerId ?? null,
-    providerAccountId: googleAccount?.accountId ?? null,
-    scopes: googleAccount?.scope ?? null,
-    providerLinkedAt: googleAccount?.createdAt?.toISOString() ?? null,
+    id: authRow[0].id,
+    name: authRow[0].name,
+    email: authRow[0].email,
+    image: authRow[0].image,
+    emailVerified: authRow[0].emailVerified,
+    authCreatedAt: authRow[0].createdAt.toISOString(),
+    appCreatedAt: appRow[0]?.createdAt?.toISOString() ?? null,
+    totalEncryptedMails: Number(appRow[0]?.totalEncryptedMails ?? 0),
+    provider: googleAccount[0]?.providerId ?? null,
+    providerAccountId: googleAccount[0]?.accountId ?? null,
+    scopes: googleAccount[0]?.scope ?? null,
+    providerLinkedAt: googleAccount[0]?.createdAt?.toISOString() ?? null,
+    sessions: sessions.map(({ token, ...rest }) => ({
+      ...rest,
+      expiresAt: rest.expiresAt.toISOString(),
+      createdAt: rest.createdAt.toISOString(),
+      updatedAt: rest.updatedAt.toISOString(),
+    })),
   };
 }

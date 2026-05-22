@@ -3,15 +3,30 @@
 import Image from 'next/image';
 import {
   BadgeCheckIcon,
-  MailIcon,
   ShieldIcon,
   UserIcon,
+  MonitorSmartphoneIcon,
 } from 'lucide-react';
 import type { UserProfile } from '@/app/api/_db/profile';
 
-function formatDate(iso: string | null): string {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString(undefined, {
+type ExtendedSession = {
+  id: string;
+  expiresAt: string | Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  ipAddress: string | null;
+  userAgent: string | null;
+  userId: string;
+};
+
+type ExtendedUserProfile = UserProfile & {
+  accessToken?: string;
+  sessions?: ExtendedSession[];
+};
+
+function formatDate(val: string | Date | null): string {
+  if (!val) return '—';
+  return new Date(val).toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
@@ -27,12 +42,12 @@ function Field({
   mono?: boolean;
 }) {
   return (
-    <div className="space-y-0.5 border-b border-black/5 py-2.5 last:border-0 sm:py-3">
+    <div className="space-y-0.5 border-b border-black/5 py-2.5 last:border-0 sm:py-3 flex flex-col w-full">
       <dt className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 sm:text-xs">
         {label}
       </dt>
       <dd
-        className={`text-xs text-black sm:text-sm ${mono ? 'break-all font-mono text-[11px] sm:text-xs' : 'wrap-break-word'}`}
+        className={`text-xs text-black sm:text-sm ${mono ? 'break-all font-mono text-[11px] sm:text-xs' : 'break-words'}`}
       >
         {value}
       </dd>
@@ -40,14 +55,14 @@ function Field({
   );
 }
 
-export default function Profile({ profile }: { profile: UserProfile }) {
+export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
   const scopeList = profile.scopes
     ? profile.scopes.split(/[\s,]+/).filter(Boolean)
     : [];
 
   return (
     <div className="min-h-0 text-black">
-      <main className="mx-auto max-w-lg px-3 py-4 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-2xl px-3 py-4 sm:px-6 sm:py-8">
         <div className="mb-4 space-y-1 sm:mb-6">
           <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Your profile</h1>
           <p className="text-xs text-zinc-500 sm:text-sm">
@@ -82,7 +97,7 @@ export default function Profile({ profile }: { profile: UserProfile }) {
             </div>
           </div>
 
-          <dl className="divide-y divide-black/5 px-3 sm:px-4">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:gap-x-4 px-3 sm:px-4 pb-2">
             <Field label="Display name" value={profile.name} />
             <Field label="Email" value={profile.email} />
             <Field label="User ID" value={profile.id} mono />
@@ -92,7 +107,7 @@ export default function Profile({ profile }: { profile: UserProfile }) {
             )}
             <Field
               label="Encrypted mails stored"
-              value={String(profile.totalEncryptedMails)}
+              value={String(profile.totalEncryptedMails || 0)}
             />
           </dl>
         </section>
@@ -104,7 +119,7 @@ export default function Profile({ profile }: { profile: UserProfile }) {
               Sign-in &amp; access
             </h2>
           </div>
-          <dl className="px-3 sm:px-4">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:gap-x-4 px-3 sm:px-4 pb-2">
             <Field
               label="Provider"
               value={profile.provider ? profile.provider.charAt(0).toUpperCase() + profile.provider.slice(1) : '—'}
@@ -113,27 +128,65 @@ export default function Profile({ profile }: { profile: UserProfile }) {
               <Field label="Provider account ID" value={profile.providerAccountId} mono />
             )}
             <Field label="Linked" value={formatDate(profile.providerLinkedAt)} />
-            {scopeList.length > 0 ? (
-              <div className="space-y-1.5 border-b border-black/5 py-2.5 last:border-0 sm:py-3">
-                <dt className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 sm:text-xs">
-                  Permissions
-                </dt>
-                <dd className="flex flex-wrap gap-1">
-                  {scopeList.map((scope) => (
+            {profile.accessToken && (
+               <Field 
+                 label="Access Token" 
+                 value={`${profile.accessToken.substring(0, 16)}...${profile.accessToken.slice(-6)}`} 
+                 mono 
+               />
+            )}
+            <div className="col-span-1 sm:col-span-2 space-y-1.5 border-b border-black/5 py-2.5 last:border-0 sm:py-3">
+              <dt className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 sm:text-xs">
+                Permissions
+              </dt>
+              <dd className="flex flex-wrap gap-1">
+                {scopeList.length > 0 ? (
+                  scopeList.map((scope) => (
                     <span
                       key={scope}
                       className="inline-block max-w-full truncate rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-[9px] text-zinc-700 sm:text-[10px]"
                     >
                       {scope}
                     </span>
-                  ))}
-                </dd>
-              </div>
-            ) : (
-              <Field label="Permissions" value="—" />
-            )}
+                  ))
+                ) : (
+                  <span className="text-xs text-black sm:text-sm">—</span>
+                )}
+              </dd>
+            </div>
           </dl>
         </section>
+        <section className="mt-3 overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm sm:mt-4">
+  <div className="border-b border-black/10 px-3 py-2 sm:px-4 sm:py-2.5">
+    <h2 className="text-xs font-medium sm:text-sm">Active Sessions</h2>
+  </div>
+  <div className="overflow-x-auto">
+    <table className="w-full text-left text-[10px] sm:text-xs">
+      <thead className="bg-zinc-50 uppercase text-zinc-400">
+        <tr>
+          <th className="px-3 py-2 font-medium">Session ID</th>
+          <th className="px-3 py-2 font-medium">IP Address</th>
+          <th className="px-3 py-2 font-medium">Expires</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-black/5">
+        {profile.sessions.map((sess) => (
+          <tr key={sess.id} className="hover:bg-zinc-50">
+            <td className="px-3 py-2 font-mono cursor-pointer hover:text-blue-600" 
+                onClick={() => navigator.clipboard.writeText(sess.id)}>
+              {sess.id.slice(0, 8)}...{sess.id.slice(-4)}
+            </td>
+            <td className="px-3 py-2 font-mono cursor-pointer hover:text-blue-600" 
+                onClick={() => sess.ipAddress && navigator.clipboard.writeText(sess.ipAddress)}>
+              {sess.ipAddress || '—'}
+            </td>
+            <td className="px-3 py-2 text-zinc-500">{new Date(sess.expiresAt).toLocaleDateString()}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
 
         <p className="mt-4 flex items-start gap-2 text-[10px] leading-relaxed text-zinc-400 sm:text-xs">
           Profile data is tied to your Google account and Firemail records.

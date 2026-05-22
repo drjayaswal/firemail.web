@@ -2,7 +2,6 @@ import { betterAuth as createBetterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { nextCookies } from "better-auth/next-js";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { db } from "@/app/db";
 import {
   authUser,
@@ -16,7 +15,6 @@ import {
   type AppSession,
 } from "@/lib/auth-server";
 import {
-  // deviceAuthorization as deviceAuthorizationSchema,
   deviceCode,
 } from "@/app/db/schema";
 
@@ -125,24 +123,4 @@ export async function getSession(): Promise<AppSession | null> {
     accessToken,
     error,
   };
-}
-
-export async function signIn(provider: "google"): Promise<void> {
-  if (provider !== "google") return;
-  const result = await auth.api.signInSocial({
-    body: {
-      provider: "google",
-      callbackURL: "/",
-    },
-    headers: await headers(),
-  });
-  if (result?.url) {
-    redirect(result.url);
-  }
-}
-
-export async function signOut(): Promise<void> {
-  await auth.api.signOut({
-    headers: await headers(),
-  });
 }

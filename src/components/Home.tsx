@@ -81,7 +81,7 @@ export default function Home({
     setLoading(false);
     setAccountDialogOpen(false);
     setAnalyzing(false);
-    toast.success('Session closed');
+    window.location.reload();
   };
 
   const selectedFetchedMails = useMemo(

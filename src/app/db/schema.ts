@@ -7,6 +7,7 @@ import {
   uniqueIndex,
   decimal,
   integer,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -50,6 +51,7 @@ export const categories = pgTable("categories", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull().unique(),
   description: text("description"),
+  examples: jsonb("examples").default([]),
 });
 
 export const encryptedMailRelations = relations(encryptedMail, ({ one }) => ({

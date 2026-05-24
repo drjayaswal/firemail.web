@@ -86,7 +86,7 @@ export default function DeviceApprovalPage() {
                 disabled={isProcessing || !userCode}
                 size="xl"
                 variant="accent"
-                className="w-full text-base"
+                className="w-full text-base bg-blue-600 hover:bg-blue-800"
               >
                 {isProcessing ? (
                   <Loader2Icon className="h-5 w-5 animate-spin mr-2" />
@@ -108,7 +108,7 @@ export default function DeviceApprovalPage() {
 
         {status === "success" && (
           <div className="flex flex-col items-center space-y-4 animate-in zoom-in fade-in duration-300 w-full py-4">
-            <CheckCircle2Icon className="w-16 h-16 text-green-500" />
+            <CheckCircle2Icon className="w-16 h-16 text-blue-600" />
             <div className="text-center space-y-1">
               <h2 className="text-xl font-semibold text-gray-900">Device Approved</h2>
               <p className="text-sm text-gray-500">Redirecting you securely...</p>

@@ -28,3 +28,15 @@ export const formatEmailContent = (rawContent: string): string => {
 
   return processed;
 };
+export const parseUserAgent = (ua?: string) => {
+  if (!ua) return "—";
+  const bunMatch = ua.match(/Bun\/([\d.]+)/i);
+  if (bunMatch) return `Bun ${bunMatch[1]}`;
+  const chromeMatch = ua.match(/Chrome\/([\d.]+)/i);
+  if (chromeMatch) return `Chrome ${chromeMatch[1]}`;
+  const safariMatch = ua.match(/Version\/([\d.]+).*Safari/i);
+  if (safariMatch) return `Safari ${safariMatch[1]}`;
+  const firefoxMatch = ua.match(/Firefox\/([\d.]+)/i);
+  if (firefoxMatch) return `Firefox ${firefoxMatch[1]}`;
+  return ua;
+};

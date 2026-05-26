@@ -7,11 +7,11 @@ const Restriction = () => {
         <div className="space-y-4">
           <Image
             src="/firemail-opensource.svg"
-            alt="Firemail"
-            width={240}
-            height={80}
-            className="mx-auto h-auto w-auto object-contain"
-            style={{ height: 'auto', width: 'auto' }}
+            alt="firemail"
+            width={100}
+            height={100}
+            quality={90}
+            style={{ width: '240px', height: 'auto' }}
             priority
           />
         </div>

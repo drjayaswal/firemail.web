@@ -63,15 +63,15 @@ export default function AppNavbar({
             className="flex min-w-0 items-center gap-2"
             onClick={closeMenu}
           >
-            <Image
-              src="/firemail-opensource.svg"
-              alt="Firemail"
-              width={80}
-              height={28}
-              className="h-6 w-auto object-contain sm:h-7"
-              style={{ width: 'auto' }}
-              priority
-            />
+              <Image
+                src="/firemail-opensource.svg"
+                alt="firemail"
+                width={100}
+                height={100}
+                quality={90}
+                style={{ width: '150px', height: 'auto' }}
+                priority
+              />
             {contextLabel ? (
               <span className="truncate text-[10px] text-zinc-500 sm:text-xs">{contextLabel}</span>
             ) : null}

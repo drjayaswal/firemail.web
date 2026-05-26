@@ -10,7 +10,6 @@ import { Loader2Icon, CheckCircle2Icon, XCircleIcon } from "lucide-react";
 type ModalState = "idle" | "success" | "denied" | "error";
 
 export default function DeviceApprovalPage() {
-  const { data: session } = authClient.useSession();
   const searchParams = useSearchParams();
   const userCode = searchParams.get("user_code");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -49,44 +48,41 @@ export default function DeviceApprovalPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center sm:p-10 p-4">
-      <div className="w-full max-w-sm border border-gray-200 rounded-xl shadow-sm p-8 space-y-8 flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
-        <div className="flex justify-center">
+    <div className="min-h-[94.28vh] flex flex-col items-center justify-center sm:p-10 p-4">
+      <div className="w-full max-w-sm space-y-6 flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
+        <div className="flex justify-center items-center">
           <Image
             src="/firemail-opensource.svg"
             alt="firemail"
             width={100}
             height={100}
             quality={90}
-            className="h-auto w-48 object-contain"
+            style={{ width: '240px', height: 'auto' }}
             priority
           />
         </div>
 
         {status === "idle" && (
-          <div className="w-full space-y-8 animate-in fade-in duration-300">
+          <div className="w-full space-y-4 animate-in fade-in duration-300">
             <div className="space-y-2 text-center">
               <h1 className="text-2xl font-semibold tracking-tight text-black">
                 Authorization Request
               </h1>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                A device is requesting access to your account.
-              </p>
             </div>
 
-            <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 w-full flex justify-center">
-              <span className="text-xl font-mono font-semibold tracking-widest text-black">
+            <div className="p-2 w-full flex justify-center">
+              <span className="text-3xl font-mono font-semibold tracking-widest text-black">
                 {userCode || "----"}
               </span>
             </div>
 
-            <div className="w-full space-y-3">
+            <div className="flex flex-col items-center justify-center gap-2">
               <Button
                 onClick={handleApprove}
                 disabled={isProcessing || !userCode}
                 size="xl"
                 variant="accent"
-                className="w-full text-base bg-blue-600 hover:bg-blue-800"
+                className="text-base bg-blue-600 hover:bg-blue-800 px-6"
               >
                 {isProcessing ? (
                   <Loader2Icon className="h-5 w-5 animate-spin mr-2" />
@@ -96,9 +92,9 @@ export default function DeviceApprovalPage() {
               <Button
                 onClick={handleDeny}
                 disabled={isProcessing || !userCode}
-                variant="light"
+                variant="accent"
                 size="xl"
-                className="w-full text-base text-gray-600 hover:text-black"
+                className="text-base bg-white! text-gray-600 hover:text-black"
               >
                 Deny
               </Button>
@@ -108,7 +104,7 @@ export default function DeviceApprovalPage() {
 
         {status === "success" && (
           <div className="flex flex-col items-center space-y-4 animate-in zoom-in fade-in duration-300 w-full py-4">
-            <CheckCircle2Icon className="w-16 h-16 text-blue-600" />
+            <CheckCircle2Icon className="w-16 h-16 text-green-600" />
             <div className="text-center space-y-1">
               <h2 className="text-xl font-semibold text-gray-900">Device Approved</h2>
               <p className="text-sm text-gray-500">Redirecting you securely...</p>
@@ -118,7 +114,7 @@ export default function DeviceApprovalPage() {
 
         {status === "denied" && (
           <div className="flex flex-col items-center space-y-4 animate-in zoom-in fade-in duration-300 w-full py-4">
-            <XCircleIcon className="w-16 h-16 text-red-500" />
+            <XCircleIcon className="w-16 h-16 text-red-600" />
             <div className="text-center space-y-1">
               <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
               <p className="text-sm text-gray-500">Redirecting to home...</p>
@@ -128,7 +124,7 @@ export default function DeviceApprovalPage() {
 
         {status === "error" && (
           <div className="flex flex-col items-center space-y-4 animate-in zoom-in fade-in duration-300 w-full py-4">
-            <XCircleIcon className="w-16 h-16 text-red-500" />
+            <XCircleIcon className="w-16 h-16 text-red-600" />
             <div className="text-center space-y-2">
               <h2 className="text-xl font-semibold text-gray-900">Action Failed</h2>
               <p className="text-sm text-gray-500 mb-4">

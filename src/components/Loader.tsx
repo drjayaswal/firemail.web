@@ -38,16 +38,15 @@ export default function Loader({ onComplete }: { onComplete?: () => void }) {
         animate={isExiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        <Image
-          src="/firemail-opensource.svg"
-          alt="firemail"
-          width={100}
-          height={100}
-          quality={90}
-          className="h-auto w-60 object-contain"
-          style={{ height: 'auto' }}
-          priority
-        />
+          <Image
+            src="/firemail-opensource.svg"
+            alt="firemail"
+            width={100}
+            height={100}
+            quality={90}
+            style={{ width: '240px', height: 'auto' }}
+            priority
+          />
         <div className="h-0.5 w-full relative bg-black/10 rounded-sm overflow-hidden">
           <motion.div
             className="absolute inset-y-0 left-0 bg-accent rounded-sm z-10"

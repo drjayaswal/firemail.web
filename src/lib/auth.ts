@@ -91,7 +91,7 @@ export const auth = createBetterAuth({
     nextCookies(),
     deviceAuthorization({ 
       verificationUri: "/device", 
-      userCodeLength: 8,
+      userCodeLength: 6,
       schema: {},
       validateClient: async (clientId) => {
         return clientId === process.env.AUTH_CLIENT_ID;

@@ -79,16 +79,16 @@ export default function DeviceConnectPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center sm:p-10 p-4">
-      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-xl shadow-sm p-8 space-y-8 flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
-        <div className="flex justify-center">
+    <div className="min-h-[94.28vh] flex flex-col items-center justify-center">
+      <div className="w-full max-w-sm space-y-4 flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
+        <div className="flex items-center justify-center">
           <Image
             src="/firemail-opensource.svg"
             alt="firemail"
             width={100}
             height={100}
             quality={90}
-            className="h-auto w-48 object-contain"
+            style={{ width: '240px', height: 'auto' }}
             priority
           />
         </div>

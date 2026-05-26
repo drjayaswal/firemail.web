@@ -4,19 +4,17 @@ import { nextCookies } from "better-auth/next-js";
 import { headers } from "next/headers";
 import { db } from "@/app/db";
 import {
-  authUser,
-  authSession,
-  authAccount,
-  authVerification
-} from "@/app/db/auth-schema";
+  user,
+  session,
+  account,
+  verification,
+  deviceCode,
+} from "@/app/db/schema";
 import {
   syncAppUserFromAuthAccount,
   resolveGoogleAccessToken,
   type AppSession,
 } from "@/lib/auth-server";
-import {
-  deviceCode,
-} from "@/app/db/schema";
 
 import { deviceAuthorization } from "better-auth/plugins";
 
@@ -43,24 +41,24 @@ export const auth = createBetterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      auth_user: authUser,
-      auth_session: authSession,
-      auth_account: authAccount,
-      auth_verification: authVerification,
+      user: user,
+      session: session,
+      account: account,
+      verification: verification,
       deviceCode: deviceCode,
     },
   }),
   user: {
-    modelName: "auth_user",
+    modelName: "user",
   },
   session: {
-    modelName: "auth_session",
+    modelName: "session",
   },
   account: {
-    modelName: "auth_account",
+    modelName: "account",
   },
   verification: {
-    modelName: "auth_verification",
+    modelName: "verification",
   },
   socialProviders: {
     google: {
@@ -96,7 +94,7 @@ export const auth = createBetterAuth({
       userCodeLength: 8,
       schema: {},
       validateClient: async (clientId) => {
-        return clientId === "firemail-cli";
+        return clientId === process.env.AUTH_CLIENT_ID;
       },
     }),
   ],

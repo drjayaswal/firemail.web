@@ -56,7 +56,7 @@ export default function AppNavbar({
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-black/10 bg-white/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="mx-auto flex h-11 max-w-7xl items-center justify-between gap-2 px-3 sm:h-12 sm:px-6">
           <Link
             href={authenticated ? '/' : '/'}
@@ -106,14 +106,6 @@ export default function AppNavbar({
                 </Button>
               );
             })}
-            {authenticated && userEmail ? (
-              <span
-                className="ml-1 max-w-[120px] truncate text-[10px] text-zinc-400 lg:max-w-[180px] lg:text-xs"
-                title={userEmail}
-              >
-                {userEmail}
-              </span>
-            ) : null}
           </nav>
 
           <Button
@@ -145,7 +137,7 @@ export default function AppNavbar({
             />
             <motion.nav
               aria-label="Mobile menu"
-              className="fixed left-0 right-0 top-0 z-50 max-h-[min(70vh,320px)] overflow-y-auto border-b rounded-b-4xl border-black/10 bg-white shadow-lg sm:hidden"
+              className="fixed left-0 right-0 top-0 z-50 max-h-[min(70vh,320px)] overflow-y-auto bg-white shadow-lg sm:hidden"
               initial={{ y: '-100%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '-100%', opacity: 0 }}

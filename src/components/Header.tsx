@@ -50,7 +50,7 @@ export default function Header({
           <button
             type="button"
             onClick={() => setSearchTerm('')}
-            className="absolute right-1 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-6 sm:w-6"
+            className="absolute right-1 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center cursor-pointer justify-center text-muted-foreground transition-colors hover:text-red-600 sm:h-6 sm:w-6"
             aria-label="Clear search"
           >
             <DeleteIcon className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
@@ -116,7 +116,7 @@ export default function Header({
             >
               <User className="h-4 w-4 shrink-0 text-black" />
               <span className="hidden max-w-[140px] truncate sm:inline-block">
-                {sessionUserEmail}
+                Account
               </span>
             </Button>
           </div>

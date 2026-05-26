@@ -1,6 +1,9 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "@/app/db";
-import { authAccount, authUser } from "@/app/db/auth-schema";
+import {
+  account as accountTable,
+  user,
+} from "@/app/db/schema";
 import { upsertOAuthUserFromCredentials } from "@/app/api/_db/user";
 import type { Account } from "better-auth";
 
@@ -32,13 +35,13 @@ export async function syncAppUserFromAuthAccount(
 
   const [authUserRow] = await db
     .select({
-      id: authUser.id,
-      email: authUser.email,
-      name: authUser.name,
-      image: authUser.image,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      image: user.image,
     })
-    .from(authUser)
-    .where(eq(authUser.id, account.userId))
+    .from(user)
+    .where(eq(user.id, account.userId))
     .limit(1);
 
   if (!authUserRow?.email) return;
@@ -102,8 +105,8 @@ export async function resolveGoogleAccessToken(userId: string): Promise<{
 }> {
   const [account] = await db
     .select()
-    .from(authAccount)
-    .where(and(eq(authAccount.userId, userId), eq(authAccount.providerId, "google")))
+    .from(accountTable)
+    .where(and(eq(accountTable.userId, userId), eq(accountTable.providerId, "google")))
     .limit(1);
 
   if (!account) {
@@ -129,13 +132,13 @@ export async function resolveGoogleAccessToken(userId: string): Promise<{
   }
 
   await db
-    .update(authAccount)
+    .update(accountTable)
     .set({
       accessToken: refreshed.accessToken,
       accessTokenExpiresAt: refreshed.expiresAt,
       updatedAt: new Date(),
     })
-    .where(eq(authAccount.id, account.id));
+    .where(eq(accountTable.id, account.id));
 
   await syncAppUserFromAuthAccount({
     ...account,

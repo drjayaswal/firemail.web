@@ -13,12 +13,6 @@ export type OAuthAccountInput = {
   id_token?: string | null;
 };
 
-function stableAccessToken(userId: string, token: string | null | undefined): string {
-  const t = token?.trim();
-  if (t) return t;
-  return `oauth:${userId}`;
-}
-
 async function upsertOAuthUserRow(opts: {
   userId: string;
   email: string;
@@ -36,10 +30,9 @@ async function upsertOAuthUserRow(opts: {
     if (existingByEmail && existingByEmail.id !== userId) {
       const oldId = existingByEmail.id;
       const holdEmail = `__migrating__${oldId}@internal.invalid`;
-      const holdToken = `__migrating__:${oldId}`;
       await tx
         .update(user)
-        .set({ email: holdEmail, accessToken: holdToken })
+        .set({ email: holdEmail })
         .where(eq(user.id, oldId));
 
       await tx
@@ -47,14 +40,15 @@ async function upsertOAuthUserRow(opts: {
         .values({
           id: userId,
           email,
-          accessToken,
+          name: email.split("@")[0],
           createdAt,
+          updatedAt: createdAt,
         })
         .onConflictDoUpdate({
           target: user.id,
           set: {
             email,
-            accessToken,
+            updatedAt: new Date(),
           },
         });
 
@@ -68,17 +62,24 @@ async function upsertOAuthUserRow(opts: {
       .values({
         id: userId,
         email,
-        accessToken,
+        name: email.split("@")[0],
         createdAt,
+        updatedAt: createdAt,
       })
       .onConflictDoUpdate({
         target: user.id,
         set: {
           email,
-          accessToken,
+          updatedAt: new Date(),
         },
       });
   });
+}
+
+function stableAccessToken(userId: string, token: string | null | undefined): string {
+  const t = token?.trim();
+  if (t) return t;
+  return `oauth:${userId}`;
 }
 
 export async function upsertOAuthUserFromCredentials(opts: {

@@ -55,7 +55,7 @@ export const Toaster = () => {
                 damping: 30,
                 mass: 1
               }}
-              className="pointer-events-auto flex items-center gap-3 overflow-hidden bg-white border border-black/10 px-4 py-3 rounded-3xl shadow-2xl min-w-[280px]"
+              className="pointer-events-auto flex items-center gap-3 overflow-hidden bg-white border border-black/10 px-2 py-1.5 rounded-3xl shadow-2xl min-w-[280px]"
             >
               <div className="shrink-0">
                  <Image 
@@ -76,7 +76,7 @@ export const Toaster = () => {
 
               <button 
                 onClick={() => toast.remove(t.id)}
-                className="ml-auto text-black hover:text-red-600 opacity-50 hover:opacity-100 transition-colors cursor-pointer z-10"
+                className="ml-auto text-black hover:text-red-600 opacity-50 hover:opacity-100 mr-1 transition-colors cursor-pointer z-10"
               >
                 <XIcon className='w-4 h-4'/>
               </button>

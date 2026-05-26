@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen p-10 flex justify-center">
+    <div className="min-h-[94.15vh] p-7 flex justify-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-3xl w-full bg-white border border-zinc-200 rounded-2xl shadow-sm p-8 sm:p-12"
+        className="max-w-3xl w-full bg-white shadow-2xl shadow-black/50 p-8 sm:p-12"
       >
         <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 mb-8">Privacy Policy</h1>
 

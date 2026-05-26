@@ -1,7 +1,6 @@
 import { eq, and, count } from "drizzle-orm";
 import { db } from "@/app/db";
-import { user, encryptedMail } from "@/app/db/schema";
-import { authUser, authAccount, authSession } from "@/app/db/auth-schema";
+import { user, encryptedMail, account, session } from "@/app/db/schema";
 
 export type Session = {
   id: string;
@@ -31,7 +30,7 @@ export type UserProfile = {
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const [authRow, appRow, googleAccount, sessions] = await Promise.all([
-    db.select().from(authUser).where(eq(authUser.id, userId)).limit(1),
+    db.select().from(user).where(eq(user.id, userId)).limit(1),
     db
       .select({ createdAt: user.createdAt, totalEncryptedMails: count(encryptedMail.id) })
       .from(user)
@@ -39,8 +38,8 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
       .where(eq(user.id, userId))
       .groupBy(user.id, user.createdAt)
       .limit(1),
-    db.select().from(authAccount).where(and(eq(authAccount.userId, userId), eq(authAccount.providerId, 'google'))).limit(1),
-    db.select().from(authSession).where(eq(authSession.userId, userId))
+    db.select().from(account).where(and(eq(account.userId, userId), eq(account.providerId, 'google'))).limit(1),
+    db.select().from(session).where(eq(session.userId, userId))
   ]);
 
   if (!authRow[0]) return null;

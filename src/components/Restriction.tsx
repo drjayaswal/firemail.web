@@ -19,7 +19,7 @@ const Restriction = () => {
         <div className="w-full p-8 space-y-6">
           <div className="space-y-2 text-center">
             <h1 className="text-xl tracking-tight text-black">Admin Only</h1>
-            <p className="text-sm text-muted-foreground">Restricted Route</p>
+            <p className="text-sm text-red-600">Restricted Route</p>
           </div>
         </div>
       </div>

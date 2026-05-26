@@ -99,6 +99,13 @@ Browser (Home)
 Auth → /api/auth/[...all] (Better Auth + Google)
 ```
 
+### CLI Integration
+
+The companion CLI companion project (`firemail.cli`) is fully integrated with this Next.js web application:
+- **Shared DB Access**: The CLI's Hono server (`packages/server`) connects directly to the same Postgres database using Drizzle ORM.
+- **Better Auth Device Flow**: Authentication is secured through Better Auth's device authorization flow.
+- **Gmail Token Resolving**: When running in `ANALYZE` mode, the CLI retrieves and automatically refreshes Google OAuth tokens directly from the shared `account` table, enabling full terminal-based inbox querying and analysis.
+
 ### API routes
 
 | Route | Method | Purpose |

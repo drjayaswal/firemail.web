@@ -33,7 +33,7 @@ export default function AnalyzeDialog({ open, onOpenChange, selectedCount, onAna
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-xl border border-black/20 bg-white sm:max-w-xs max-w-xs">
+      <DialogContent className="rounded-xl border border-gray-200/75 bg-white sm:max-w-xs max-w-xs">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="text-xl tracking-tight text-black">Analyze selected</DialogTitle>
@@ -61,7 +61,7 @@ export default function AnalyzeDialog({ open, onOpenChange, selectedCount, onAna
               </div>
             </div>
           </div>
-          <DialogFooter className="grid grid-cols-2 gap-2 border-t-black/20 bg-white">
+          <DialogFooter className="grid grid-cols-2 gap-2 border-t-gray-200/75 bg-white">
             <Button type="button" variant="no_outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>

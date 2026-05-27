@@ -49,15 +49,14 @@ export default function MailInboxTabs({ active, fetchedCount, analyzedCount, enc
         })}
       </div>
 
-      <div className="flex items-center gap-1 sm:border-l sm:border-black/20 pl-2 h-6">
+      <div className="flex items-center gap-1 sm:border-l sm:border-gray-200/75 pl-2 h-6">
         {(['Active', 'Standby', 'Processing', 'Offline'] as const).map((s) => {
           const isCurrent = currentStatus === s;
           return (
-            <div 
-              key={s} 
-              className={`flex items-center gap-2 px-2 py-1 select-none transition-opacity ${
-                isCurrent ? 'opacity-100 font-medium text-black' : 'opacity-40 text-gray-500'
-              }`}
+            <div
+              key={s}
+              className={`flex items-center gap-2 px-2 py-1 select-none transition-opacity ${isCurrent ? 'opacity-100 font-medium text-black' : 'opacity-40 text-gray-500'
+                }`}
             >
               <div className={`h-2 w-2 rounded-full ${statusConfig[s].color}`} />
               <span className="sm:text-xs text-[9px]">{s}</span>

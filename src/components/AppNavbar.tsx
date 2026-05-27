@@ -63,16 +63,16 @@ export default function AppNavbar({
             className="flex min-w-0 items-center gap-2"
             onClick={closeMenu}
           >
-              <Image
-                src="/firemail-opensource.svg"
-                alt="firemail"
-                width={100}
-                height={100}
-                quality={90}
-                style={{ width: '150px', height: 'auto' }}
-                priority
-              />
-              <span className="truncate text-[10px] text-zinc-500 sm:text-xs">{contextLabel}</span>
+            <Image
+              src="/firemail-opensource.svg"
+              alt="firemail"
+              width={100}
+              height={100}
+              quality={90}
+              style={{ width: '150px', height: 'auto' }}
+              priority
+            />
+            <span className="truncate text-[10px] text-zinc-500 sm:text-xs">{contextLabel}</span>
           </Link>
 
           <nav className="hidden items-center gap-1 sm:flex" aria-label="Main">
@@ -126,7 +126,7 @@ export default function AppNavbar({
             <motion.button
               type="button"
               aria-label="Close menu"
-              className="fixed inset-0 z-40 bg-black/20 sm:hidden"
+              className="fixed inset-0 z-40 bg-gray-200/75 sm:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

@@ -22,13 +22,13 @@ export default function MailSheet({ mail, onClose }: MailDetailSheetProps) {
 
   const formattedDate = mail
     ? new Date(mail.createdAt).toLocaleString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
     : '';
 
   return (
@@ -48,12 +48,12 @@ export default function MailSheet({ mail, onClose }: MailDetailSheetProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-            className="fixed bottom-0 left-0 right-0 z-70 flex max-h-[88dvh] flex-col rounded-t-2xl border border-b-0 border-black/20 bg-white shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-70 flex max-h-[88dvh] flex-col rounded-t-2xl border border-b-0 border-gray-200/75 bg-white shadow-2xl"
           >
             <div className="flex shrink-0 justify-center pt-3 pb-1">
-              <div className="h-1 w-8 rounded-full bg-black/20" />
+              <div className="h-1 w-8 rounded-full bg-gray-200/75" />
             </div>
-            <div className="shrink-0 px-4 sm:px-5 pt-2 pb-3 border-b border-black/20">
+            <div className="shrink-0 px-4 sm:px-5 pt-2 pb-3 border-b border-gray-200/75">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-black/5 border border-black/10 flex items-center justify-center">

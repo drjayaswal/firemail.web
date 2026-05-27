@@ -55,7 +55,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
-      <body className="flex flex-col select-none">
+      <body className="bg-gray-50 flex flex-col select-none">
         <Toaster />
         <Suspense fallback={<Loading />}>
           <main className="flex-1">

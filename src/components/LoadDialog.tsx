@@ -32,7 +32,7 @@ export default function LoadDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl border border-black/20 bg-white sm:max-w-xs max-w-xs p-5">
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-xl border border-gray-200/75 bg-white sm:max-w-xs max-w-xs p-5">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-xl tracking-tight text-black">Load mails</DialogTitle>
           <DialogDescription className="text-[10px] uppercase tracking-widest text-black/60">
@@ -40,7 +40,7 @@ export default function LoadDialog({
           </DialogDescription>
         </DialogHeader>
         <DatabaseQueryFields {...fields} />
-        <DialogFooter className="grid grid-cols-2 gap-2 border-t-black/20 bg-white">
+        <DialogFooter className="grid grid-cols-2 gap-2 border-t-gray-200/75 bg-white">
           <Button
             type="button"
             variant="accent"

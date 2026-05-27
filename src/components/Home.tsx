@@ -227,8 +227,8 @@ export default function Home({
           onLoadDataFromDatabase={() => setLoadDialogOpen(true)}
           sessionUserEmail={sessionUserEmail}
         />
-        <Card className="min-w-0 bg-white border-black/20 m-0! overflow-hidden">
-          <CardHeader className="flex min-w-0 flex-col gap-4 border-black/20 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="min-w-0 bg-white border-gray-200/75 shadow-md m-0! overflow-hidden">
+          <CardHeader className="flex min-w-0 flex-col gap-4 border-gray-200/75 sm:flex-row sm:items-center sm:justify-between">
             <MailInboxTabs
               active={activeTab}
               currentStatus={orchestratorStatus}
@@ -238,7 +238,7 @@ export default function Home({
               onChange={setActiveTab}
             />
           </CardHeader>
-          <CardContent className="min-w-0 border-black/20 px-3 sm:px-4">
+          <CardContent className="min-w-0 border-gray-200/75 px-3 sm:px-4">
             <MailTable
               mails={filteredMails}
               loading={loading && (activeTab === 'fetched' || activeTab === 'encrypted')}

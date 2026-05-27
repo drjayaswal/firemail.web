@@ -51,38 +51,52 @@ export default function Auth() {
 
   return (
     <div className="min-h-[94.28vh] flex flex-col items-center justify-center">
-      <div className="w-full max-w-sm space-y-4 flex flex-col items-center">
-        <div className="flex justify-center">
-          <Image
-            src="/firemail-opensource.svg"
-            alt="firemail"
-            width={100}
-            height={100}
-            quality={90}
-            style={{ width: '240px', height: 'auto' }}
-            priority
-          />
-        </div>
-        <Button
-          type="button"
-          size="xl"
-          variant="light"
-          disabled={loading}
-          onClick={handleGoogleSignIn}
-        >
-          {loading ? (
-            <Loader2Icon className="h-[18px] w-[18px] animate-spin" />
-          ) : (
+      <div className="w-full sm:max-w-sm max-w-68 border bg-white border-gray-200/75 shadow-xl sm:p-4 py-4 rounded-2xl space-y-4 flex flex-col items-center">
+        <div className="flex items-center gap-2 divide-x space-x-4 divide-gray-200/75">
+          <div className="sm:inline hidden px-2">
             <Image
-              src="/google.svg"
-              alt="Google"
-              width={18}
-              height={18}
-              className="bg-white p-0.5 rounded-sm"
+              src="/about-our-team.svg"
+              alt="firemail"
+              width={100}
+              height={100}
+              quality={90}
+              style={{ width: 'auto', height: 'auto' }}
+              priority
             />
-          )}
-          {loading ? 'Redirecting…' : 'Continue with Google'}
-        </Button>
+          </div>
+          <div className="flex flex-col gap-4 items-center justify-center">
+            <Image
+              src="/firemail-opensource.svg"
+              alt="firemail"
+              width={100}
+              height={100}
+              quality={90}
+              style={{ width: '240px', height: 'auto' }}
+              priority
+            />
+          <Button
+            type="button"
+            size="xl"
+            variant="light"
+            disabled={loading}
+            className='px-4'
+            onClick={handleGoogleSignIn}
+          >
+            {loading ? (
+              <Loader2Icon className="h-[18px] w-[18px] animate-spin" />
+            ) : (
+              <Image
+                src="/google.svg"
+                alt="Google"
+                width={18}
+                height={18}
+                className="bg-white p-0.5 rounded-sm"
+              />
+            )}
+            {loading ? 'Redirecting…' : 'Continue with Google'}
+          </Button>
+        </div>
+        </div>
       </div>
     </div>
   );

@@ -306,7 +306,7 @@ export function ChatPanel() {
                                 e.target.style.height = Math.min(e.target.scrollHeight, 180) + "px";
                             }}
                             onKeyDown={handleKeyDown}
-                            placeholder="Message Claude…"
+                            placeholder="Message Firemail..."
                             rows={1}
                             className={cn(
                                 "w-full resize-none bg-transparent",
@@ -321,13 +321,13 @@ export function ChatPanel() {
                                 {!loading && (
                                     <kbd className={cn(
                                         "hidden sm:inline-flex items-center gap-1",
-                                        "text-[11px] font-mono text-muted-foreground/50",
-                                        "border border-border/40 rounded-md px-1.5 py-[3px]",
+                                        "text-[11px] font-mono text-muted-foreground",
+                                        "border border-gray-100 rounded-md px-1.5 py-[3px]",
                                         "bg-muted/40 select-none leading-none",
                                         "transition-opacity duration-150",
                                         input.trim() ? "opacity-100" : "opacity-0"
                                     )}>
-                                        return <CornerDownLeft className="h-[9px] w-[9px]" />
+                                        Return <CornerDownLeft className="h-[9px] w-[9px]" />
                                     </kbd>
                                 )}
 

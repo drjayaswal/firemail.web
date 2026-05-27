@@ -67,9 +67,9 @@ export default function MailTable({
           <TableRow>
             {selectable ? (
               <TableHead className="w-10">
-                {selectedIds?.size || allSelected ? 
-                <Checkbox checked={allSelected} onCheckedChange={() => onToggleAll?.()} aria-label="Select all" />
-                :null}
+                {selectedIds?.size || allSelected ?
+                  <Checkbox checked={allSelected} onCheckedChange={() => onToggleAll?.()} aria-label="Select all" />
+                  : null}
               </TableHead>
             ) : null}
             <TableHead className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-[12px] sm:tracking-widest">Status</TableHead>
@@ -107,7 +107,7 @@ export default function MailTable({
                 </TableRow>
               ))
             ) : mails.length === 0 ? (
-              <TableRow className="border-black/20 hover:bg-transparent">
+              <TableRow className="border-gray-200/75 hover:bg-transparent">
                 <TableCell colSpan={selectable ? 6 : 5} className="h-32 text-center text-[10px] uppercase tracking-wider text-muted-foreground sm:h-48 sm:text-xs sm:tracking-widest">
                   No Mails Found
                 </TableCell>

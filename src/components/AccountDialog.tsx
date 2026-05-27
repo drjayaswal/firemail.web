@@ -43,7 +43,7 @@ export default function AccountDialog({ open, onOpenChange, onSignOut }: Account
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent aria-describedby={undefined} className="rounded-xl border border-black/20 bg-white p-5 sm:max-w-xs">
+            <DialogContent aria-describedby={undefined} className="rounded-xl border border-gray-200/75 bg-white p-5 sm:max-w-xs">
                 <DialogHeader>
                     <DialogTitle className="text-xl tracking-tight text-black">Account</DialogTitle>
                     {data ? (

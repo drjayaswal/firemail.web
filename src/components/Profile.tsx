@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BadgeCheckIcon, ShieldIcon, UserIcon } from "lucide-react";
+import { BadgeCheckIcon, BarChart2Icon, BrainIcon, MessageSquareIcon, ShieldIcon, UserIcon } from "lucide-react";
 import type { UserProfile } from "@/app/api/_db/profile";
 import { parseUserAgent } from "@/lib/utils";
 
@@ -18,6 +18,11 @@ type ExtendedSession = {
 type ExtendedUserProfile = UserProfile & {
   accessToken?: string;
   sessions?: ExtendedSession[];
+  conversations: {
+    totalConversations: number;
+    totalMessages: number;
+    avgMessagesPerConv: number;
+  };
 };
 
 function formatDate(val: string | Date | null): string {
@@ -38,7 +43,7 @@ function Field({
   mono?: boolean;
 }) {
   return (
-    <div className="space-y-0.5 border-b border-black/5 py-2.5 last:border-0 sm:py-3 flex flex-col w-full">
+    <div className="space-y-0.5 py-2.5 last:border-0 sm:py-3 flex flex-col w-full">
       <dt className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 sm:text-xs">
         {label}
       </dt>
@@ -64,8 +69,7 @@ export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
             Your profile
           </h1>
           <p className="text-xs text-zinc-500 sm:text-sm">
-            Account details from your sign-in. This information is read-only and
-            cannot be edited here.
+            Account details from your sign-in. This is read-only information and can't be edited.
           </p>
         </div>
 
@@ -103,7 +107,7 @@ export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
           <dl className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:gap-x-4 px-3 sm:px-4 pb-2">
             <Field label="Display name" value={profile.name} />
             <Field label="Email" value={profile.email} />
-            <Field label="User ID" value={profile.id} mono />
+            <Field label="User ID" value={profile.id.slice(0, profile.id.length / 2).concat("XXXXXXX")} mono />
             <Field
               label="Signed up"
               value={formatDate(profile.authCreatedAt)}
@@ -115,11 +119,61 @@ export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
               />
             )}
             <Field
-              label="Encrypted mails stored"
+              label="Encrypted Context stored"
               value={String(profile.totalEncryptedMails || 0)}
             />
           </dl>
         </section>
+        {profile.conversationAnalytics && (
+          <>
+            <section className="mt-3 overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm sm:mt-4">
+              <div className="border-b border-black/10 px-3 py-2 sm:px-4 sm:py-2.5">
+                <h2 className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
+                  <BarChart2Icon className="h-3.5 w-3.5 text-zinc-400" />
+                  Message Analytics
+                </h2>
+              </div>
+              <dl className="grid grid-cols-1 sm:grid-cols-3  px-3 sm:px-4 py-2">
+                <Field
+                  label="Response Time"
+                  value={`${profile.conversationAnalytics.avgResponseLatencySeconds}s`}
+                />
+                <Field
+                  label="Tokens/Query"
+                  value={`${profile.conversationAnalytics.avgUserMsgLength} tokens`}
+                />
+                <Field
+                  label="Tokens/Response"
+                  value={`${profile.conversationAnalytics.avgAssistantMsgLength} tokens`}
+                />
+              </dl>
+            </section>
+            {profile.conversationAnalytics.thinkingUsageCount > 0 && (
+              <section className="mt-3 overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm sm:mt-4">
+                <div className="border-b border-black/10 px-3 py-2 sm:px-4 sm:py-2.5">
+                  <h2 className="flex items-center gap-1.5 text-xs font-medium sm:text-sm">
+                    <BrainIcon className="h-3.5 w-3.5 text-zinc-400" />
+                    Extended Thinking
+                  </h2>
+                </div>
+                <dl className="grid grid-cols-1 sm:grid-cols-3  px-3 sm:px-4 py-2">
+                  <Field
+                    label="Replies with Thinking"
+                    value={`${profile.conversationAnalytics.thinkingUsageCount} of ${profile.conversationAnalytics.assistantCount}`}
+                  />
+                  <Field
+                    label="Thinking Tokens"
+                    value={`${profile.conversationAnalytics.avgThinkingLength} tokens`}
+                  />
+                  <Field
+                    label="Thinking Used"
+                    value={`${profile.conversationAnalytics.thinkingUsageCount} replies (${profile.conversationAnalytics.thinkingUsagePct}%)`}
+                  />
+                </dl>
+              </section>
+            )}
+          </>
+        )}
 
         <section className="mt-3 overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm sm:mt-4">
           <div className="border-b border-black/10 px-3 py-2 sm:px-4 sm:py-2.5">
@@ -140,8 +194,8 @@ export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
             />
             {profile.providerAccountId && (
               <Field
-                label="Provider account ID"
-                value={profile.providerAccountId}
+                label="Provider acc. ID"
+                value={profile.providerAccountId.slice(profile.providerAccountId.length/2).concat("XXXXXXX")}
                 mono
               />
             )}
@@ -163,12 +217,15 @@ export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
               <dd className="flex flex-wrap gap-1">
                 {scopeList.length > 0 ? (
                   scopeList.map((scope) => (
-                    <span
+                    <a
                       key={scope}
+                      href={`https://www.google.com/search?q=${scope}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-block max-w-full truncate rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-[9px] text-zinc-700 sm:text-[10px]"
                     >
                       {scope}
-                    </span>
+                    </a>
                   ))
                 ) : (
                   <span className="text-xs text-black sm:text-sm">—</span>
@@ -207,7 +264,7 @@ export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
                         navigator.clipboard.writeText(sess.ipAddress)
                       }
                     >
-                      {sess.ipAddress || "—"}
+                      {sess.ipAddress ? `${sess.ipAddress.slice(0, 8)}...${sess.ipAddress.slice(-4)}` : "—"}
                     </td>
                     <td className="px-3 py-2 text-zinc-500">
                       {parseUserAgent(sess.userAgent || "").split(" ")[0] || "—"}
@@ -223,7 +280,7 @@ export default function Profile({ profile }: { profile: ExtendedUserProfile }) {
         </section>
 
         <p className="mt-4 flex items-start gap-2 text-[10px] leading-relaxed text-zinc-400 sm:text-xs">
-          Profile data is tied to your Google account and Firemail records.
+          Profile data is tied to your Firemail account and Firemail records.
         </p>
       </main>
     </div>

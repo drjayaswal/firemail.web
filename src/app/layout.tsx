@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import Loading from "./loading";
 import "./globals.css";
 import { Toaster } from "@/components/Toaster";
-import AppNavbarShell from "@/components/AppNavbarShell";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://firemail.in"),
@@ -58,7 +57,6 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body className="flex flex-col select-none">
         <Toaster />
-        <AppNavbarShell />
         <Suspense fallback={<Loading />}>
           <main className="flex-1">
             {children}

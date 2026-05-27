@@ -18,6 +18,7 @@ type NavItem = {
 function pageLabel(pathname: string): string | null {
   if (pathname.startsWith('/admin')) return 'Admin';
   if (pathname.startsWith('/profile')) return 'Profile';
+  if (pathname.startsWith('/dashboard')) return 'Dashboard';
   if (pathname === '/') return 'Firebox';
   if (pathname.startsWith('/help')) return 'Help';
   if (pathname.startsWith('/privacy-policy')) return 'Privacy';
@@ -27,12 +28,10 @@ function pageLabel(pathname: string): string | null {
 
 export default function AppNavbar({
   authenticated,
-  isAdmin,
-  userEmail,
+  isAdmin
 }: {
   authenticated: boolean;
   isAdmin: boolean;
-  userEmail: string | null;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -41,6 +40,7 @@ export default function AppNavbar({
     () => [
       { href: '/', label: 'Firebox', show: authenticated },
       { href: '/profile', label: 'Profile', show: authenticated },
+      { href: '/dashboard', label: 'Dashboard', show: authenticated },
       { href: '/admin', label: 'Admin', show: authenticated && isAdmin },
       { href: '/help', label: 'Help', show: true },
       { href: '/privacy-policy', label: 'Privacy', show: !authenticated },
@@ -72,9 +72,7 @@ export default function AppNavbar({
                 style={{ width: '150px', height: 'auto' }}
                 priority
               />
-            {contextLabel ? (
               <span className="truncate text-[10px] text-zinc-500 sm:text-xs">{contextLabel}</span>
-            ) : null}
           </Link>
 
           <nav className="hidden items-center gap-1 sm:flex" aria-label="Main">

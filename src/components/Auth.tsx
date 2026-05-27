@@ -13,23 +13,21 @@ export default function Auth() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [redirectTo, setRedirectTo] = useState("/");
-  
+
   useEffect(() => {
-    // 1. Grab the full encoded redirect path (e.g., "/device?user_code=ABCD1234")
     const redirectParam = searchParams.get("redirect");
     if (redirectParam) {
       setRedirectTo(redirectParam);
     }
   }, [searchParams]);
-  
+
   const handleGoogleSignIn = async () => {
     if (loading) return;
     setLoading(true);
     try {
       const { data, error } = await authClient.signIn.social({
         provider: 'google',
-        // 2. Pass the exact path back to the callbackURL
-        callbackURL: redirectTo, 
+        callbackURL: redirectTo,
       });
 
       if (error) {
@@ -55,15 +53,15 @@ export default function Auth() {
     <div className="min-h-[94.28vh] flex flex-col items-center justify-center">
       <div className="w-full max-w-sm space-y-4 flex flex-col items-center">
         <div className="flex justify-center">
-                <Image
-                  src="/firemail-opensource.svg"
-                  alt="firemail"
-                  width={100}
-                  height={100}
-                  quality={90}
-                  style={{ width: '240px', height: 'auto' }}
-                  priority
-                />
+          <Image
+            src="/firemail-opensource.svg"
+            alt="firemail"
+            width={100}
+            height={100}
+            quality={90}
+            style={{ width: '240px', height: 'auto' }}
+            priority
+          />
         </div>
         <Button
           type="button"

@@ -20,6 +20,7 @@ import { toast } from '@/lib/toast';
 import Loader from './Loader';
 import LoadDialog from './LoadDialog';
 import AccountDialog from './AccountDialog';
+import { useRouter } from 'next/navigation';
 
 type SystemStatus = 'Active' | 'Standby' | 'Processing' | 'Offline';
 
@@ -54,7 +55,7 @@ export default function Home({
   const [detailMail, setDetailMail] = useState<Mail | null>(null);
   const [encryptedMails, setEncryptedMails] = useState<Mail[]>([]);
   const [orchestratorStatus, setOrchestratorStatus] = useState<SystemStatus>('Offline');
-
+  const router = useRouter();
   const handleFetchFromCloud = (opts: FetchOptions) => {
     void (async () => {
       setLoading(true);
@@ -81,7 +82,7 @@ export default function Home({
     setLoading(false);
     setAccountDialogOpen(false);
     setAnalyzing(false);
-    window.location.reload();
+    router.push("/thank-you")
   };
 
   const selectedFetchedMails = useMemo(

@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
+import { useState } from "react";
+import { useRouter } from 'next/navigation';
 import { authClient } from "@/lib/auth-client";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Loader2Icon, CheckCircle2Icon, XCircleIcon } from "lucide-react";
 
@@ -14,7 +15,7 @@ export default function DeviceApprovalPage() {
   const userCode = searchParams.get("user_code");
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState<ModalState>("idle");
-
+  const router = useRouter();
   const handleApprove = async () => {
     setIsProcessing(true);
     try {
@@ -23,7 +24,7 @@ export default function DeviceApprovalPage() {
       });
       setStatus("success");
       setTimeout(() => {
-        window.location.href = "/";
+        router.push("/thank-you")
       }, 2000);
     } catch (error) {
       setStatus("error");
@@ -39,7 +40,7 @@ export default function DeviceApprovalPage() {
       });
       setStatus("denied");
       setTimeout(() => {
-        window.location.href = "/";
+        router.push("/thank-you")
       }, 2000);
     } catch (error) {
       setStatus("error");

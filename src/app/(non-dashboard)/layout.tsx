@@ -6,10 +6,10 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-return (
-    <div>
-        <AppNavbarShell />
-        <main className="flex-1">
+    return (
+        <div>
+            <AppNavbarShell />
+            <main className="flex-1">
                 {children}
             </main>
         </div>

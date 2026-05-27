@@ -1,17 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import { nanoid } from "nanoid";
+import { cn } from "@/lib/utils";
+import { toast } from "@/lib/toast";
+import { Message } from "./message";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chat-store";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { ArrowUp, Paperclip, MoreHorizontal, Eye, EyeOff, CornerDownLeft, Sparkles } from "lucide-react";
-import { Message } from "./message";
-import { toast } from "@/lib/toast";
-import { authClient } from "@/lib/auth-client";
+import { ArrowUp, Eye, EyeOff, CornerDownLeft, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import Image from "next/image";
 
 const COMMANDS = [
     { value: "/new", label: "New Chat", desc: "Start a fresh session" },
@@ -46,7 +47,7 @@ export function ChatPanel() {
     const [commandIndex, setCommandIndex] = useState(0);
     const scrollRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+    const router = useRouter();
     const activeConversation = useMemo(
         () => conversations.find((c) => c.id === activeConversationId),
         [conversations, activeConversationId]
@@ -92,7 +93,7 @@ export function ChatPanel() {
             setTheme(THEMES[(idx + 1) % THEMES.length].name);
         } else if (cmdVal === "/logout") {
             await authClient.signOut();
-            window.location.reload();
+            router.push("/thank-you")
         }
     };
 
